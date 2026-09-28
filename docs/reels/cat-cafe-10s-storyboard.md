@@ -3,49 +3,62 @@
 - **상태:** 초안, 승인 대기 중 (Runway 생성 전)
 - **포맷:** 세로 9:16 (1080×1920 편집 / Runway 720:1280 생성), 10초, 24fps
 - **핵심 메시지:** 평범한 반려동물 사진 한 장이 세상에 하나뿐인 공간과 유화 작품으로 완성된다.
-- **입력 소스:** `IMG1` 원본 고양이 사진, `IMG2` 고양이 카페 배경 유화 완성작
+- **입력 소스:** `IMG1` 원본 고양이 사진, `IMG2` 고양이 카페 배경 유화 완성작 (크롭 결과물은 저장소에 커밋하지 않음)
 
-## 0. 생성 전 소스 준비 (크레딧 없이 로컬에서)
+## 0. 소스 분석과 크롭 (크레딧 없이 로컬에서 완료)
 
-1. **워터마크 제거 크롭:** IMG2 하단의 Meta AI 워터마크 영역을 여유 있게(워터마크 높이 + 2~3%) 잘라낸다. 이후 9:16으로 중앙 크롭하고, 고양이는 화면 상단 ⅓~중앙에 둔다.
-2. **IMG1도 같은 프레이밍으로:** 고양이 눈 위치와 크기가 IMG2 크롭과 겹치게 맞춘다. 장면 2 전환에서 고양이가 흔들리지 않게 하려는 것이다.
-3. **하단 20%는 비워둔다:** 릴스·틱톡 UI(캡션, 버튼)가 덮는 영역이고, 카메라가 전진하면서 하단이 자연히 더 잘려 나가 워터마크 재노출도 막아준다.
-4. 크롭 결과물: `IMG1_916.png`, `IMG2_916.png` (각각 1080×1920 이상)
+**소스 분석**
+- IMG1 원본: 1080×810 가로 사진. 스코티시 폴드 계열 브라운 태비. 접힌 귀, 노란빛 초록 눈, 분홍 코, 배와 다리에 주황빛 털. 흰 수건 위에 엎드려 몸을 오른쪽으로 길게 뻗은 자세.
+- IMG2 완성작: 1344×1792 세로(3:4). 원본을 약 1.29배 키우고 위쪽에 카페 공간을 더한 구도. 눈 기준 변환은 `painting = photo × 1.29 + (-6, 569)`.
+- Meta AI 워터마크: IMG2 오른쪽 아래, 약 x 1000–1325 / y 1645–1720.
+
+**핵심 제약:** 원본은 가로 사진이라 유화의 아래쪽 약 2/3만 겹칩니다. 원본과 유화를 같은 넓은 9:16 구도로 맞출 수 없습니다.
+→ 장면 1·2는 **타이트 구도(얼굴과 앞발)**로 정렬하고, 장면 3에서 **넓은 구도로 컷 전환해 카페 공간을 공개**합니다. 각 장면 안에서 카메라는 계속 전진만 합니다.
+
+| 파일 (720×1280) | 용도 | 원본 크롭 좌표 (x1,y1,x2,y2) |
+| --- | --- | --- |
+| `S1_S2first_photo_916.png` | 장면 1 입력, 장면 2 첫 프레임 | IMG1 (95, 0, 551, 810) |
+| `S2last_painting_tight_916.png` | 장면 2 끝 프레임 | IMG2 (117, 569, 705, 1614), 눈 위치 정렬 |
+| `S3_painting_wide_916.png` | 장면 3 입력 | IMG2 (40, 0, 940, 1600), 워터마크 영역 완전 제외 |
+
+- 넓은 크롭은 y 1600에서 잘라 워터마크(y 1645~)와 아래쪽 선반 잡동사니를 함께 뺐습니다. 이미지에 워터마크가 아예 없으므로 영상에 나타날 수 없습니다.
+- 원본 크롭은 456×810에서 1.58배 확대한 것이라 약간 부드럽습니다. "평범한 사진" 느낌이라 오히려 대비에 도움이 됩니다.
 
 ## 1. 스토리보드
 
 | 장면 | 시간 | 화면 | 카메라 | 허용되는 움직임 | 입력 |
 | --- | --- | --- | --- | --- | --- |
-| 1. 원본 사진 소개 | 0:00–0:02 | 평범한 일상 속 고양이 사진. 자연광, 살짝 차분한 톤 | 아주 느린 전진 (약 3~5% 줌) | 눈 한 번 깜빡임, 미세한 호흡 | IMG1_916 |
-| 2. 사진 → 유화 전환 | 0:02–0:05 | 붓 터치가 가장자리에서 중심으로 번지며 사진이 유화로 바뀌고, 배경이 고양이 카페로 녹아든다. 고양이 형태·무늬는 그대로 | 느린 전진 유지 (끊김 없이 이어짐) | 고양이 정지, 물감 질감만 형성 | 첫 프레임 IMG1_916 → 끝 프레임 IMG2_916 |
-| 3. 완성작 공개 | 0:05–0:10 | 고양이 카페 유화 완성작. 임파스토 질감과 붓 자국이 빛을 받아 도드라진다 | 매우 느린 전진 (약 5~8% 줌) | 미세한 깜빡임·호흡, 배경 조명만 은은하게 반짝임 | IMG2_916 |
+| 1. 원본 사진 소개 | 0:00–0:02 | 집 안 흰 수건 위에 엎드린 고양이. 얼굴과 앞발 중심, 있는 그대로의 스냅 사진 톤 | 아주 느린 전진 (약 3~5%) | 눈 한 번 깜빡임, 미세한 호흡 | S1_S2first_photo_916 |
+| 2. 사진 → 유화 전환 | 0:02–0:05 | 붓 터치가 가장자리에서 중심으로 번지며 털과 수건이 유화로 바뀜. 배경이 따뜻한 나무 카운터로 녹아듦 | 전진 계속 | 고양이 정지, 물감 질감만 생김 | 첫 S1_S2first → 끝 S2last_painting_tight |
+| 3. 완성작 공개 | 0:05–0:10 | **컷 전환(음악 비트)** 후 넓은 구도. 선반, 크루아상 돔, 식물, 줄조명이 있는 카페 유화 전체 | 얼굴 쪽으로 매우 느린 전진 (약 6~8%, 얼굴은 화면 가로 41%·세로 49% 지점) | 깜빡임·호흡, 줄조명과 창빛만 은은하게 반짝임 | S3_painting_wide_916 |
 
-**감정 흐름:** 익숙함(내 아이 사진) → 기대(변화) → 감탄(작품, 공간).
-**음악 제안(편집 단계):** 잔잔한 피아노나 어쿠스틱. 장면 2 시작점(0:02)에 부드러운 스웰, 장면 3 공개(0:05)에 맞춰 코드가 풀리게 한다.
-**텍스트·로고:** 영상 생성물에는 넣지 않는다. 필요하면 편집 툴에서 마지막 프레임 위에 별도 레이어로 얹는다.
+**감정 흐름:** 익숙함(우리 집 아이) → 기대(변화) → 감탄(작품과 공간).
+**음악 제안(편집 단계):** 잔잔한 피아노나 어쿠스틱. 0:02에 부드러운 스웰, 0:05 컷에 맞춰 코드가 풀리게 한다.
+**텍스트·로고:** 영상 생성물에는 넣지 않는다. 필요하면 편집 툴에서 별도 레이어로 얹는다.
 
 ## 2. Runway 프롬프트 (영문)
 
 작성 원칙:
 - 이미지 투 비디오에서는 **고양이 외형을 묘사하지 않는다.** 외형은 입력 이미지가 결정하고, 텍스트로 묘사하면 오히려 얼굴이나 무늬가 바뀔 수 있다. 프롬프트에는 움직임, 카메라, 빛, 질감만 적는다.
-- **부정문을 쓰지 않는다** ("no text", "no new cats" 등). Runway 공식 가이드상 부정 프롬프트는 반대 결과를 낼 수 있어, "stays still", "the scene stays unchanged" 같은 긍정 표현으로 제약한다. 글자·로고·추가 물체는 프롬프트에 아예 등장시키지 않는 것이 가장 안전하다.
+- **부정문을 쓰지 않는다** ("no text", "no new cats" 등). Runway 공식 가이드상 부정 프롬프트는 반대 결과를 낼 수 있어 긍정 표현으로 제약한다.
+- 장면 3 선반의 **고양이 인형**이 살아 움직이는 것이 가장 큰 위험이라, 인형이 정지해 있다고 명시한다.
 
 ### 장면 1: 원본 사진 소개 (2초)
 
 ```
-Slow, smooth dolly-in toward the cat. The cat stays seated and perfectly still, keeping its original pose and gaze, with one soft natural blink and gentle, subtle breathing. Warm natural window light, shallow depth of field, soft film grain. Calm, intimate, premium mood. Locked composition, steady camera.
+Slow, smooth dolly-in toward the cat's face. The cat stays lying down on the towel, perfectly still, keeping its original pose and gaze, with one soft natural blink and gentle, subtle breathing. Natural, true-to-life home snapshot look with soft indoor light. Calm, intimate mood. Locked composition, steady camera.
 ```
 
 ### 장면 2: 사진에서 유화로 (3초)
 
 ```
-Continuous slow dolly-in. The photograph gradually transforms into a hand-painted oil painting: rich impasto brushstrokes sweep inward from the edges toward the center, thick oil paint texture forming over the fur and the surroundings. The cat stays perfectly still, keeping exactly the same pose, face, eyes, ears and fur pattern. The background softly dissolves into a warm, cozy cat café interior. Warm golden light, elegant painterly transformation, fine art.
+Continuous slow dolly-in. The photograph gradually transforms into a hand-painted oil painting: rich impasto brushstrokes sweep inward from the edges toward the center, thick oil paint texture forming over the fur and the white towel. The cat stays perfectly still, keeping exactly the same pose, face, eyes, folded ears and fur pattern. The background softly dissolves into warm wooden café furniture. Warm golden light, elegant painterly transformation, fine art.
 ```
 
 ### 장면 3: 고양이 카페 유화 완성작 공개 (5초)
 
 ```
-Very slow, steady dolly-in toward the cat in the oil painting. The cat remains seated and completely still, with only a subtle blink and gentle breathing. The canvas surface is richly textured, with thick impasto brushstrokes and visible paint ridges catching the warm light. In the cat café background, the warm lamps and small lights twinkle softly and gently. Everything else in the scene stays calm and unchanged. Cozy, warm, premium gallery atmosphere, fine art oil painting.
+Very slow, steady dolly-in toward the cat's face in the oil painting. The cat remains lying down and completely still, with only a subtle blink and gentle breathing. The canvas surface is richly textured, with thick impasto brushstrokes and visible paint ridges catching the warm light. The string of fairy lights at the top twinkles softly and the window light glows gently. The figurines, plants, pastries and furniture stay perfectly still. Cozy, warm, premium gallery atmosphere, fine art oil painting.
 ```
 
 ## 3. 생성 설정 (권장)
@@ -60,7 +73,7 @@ Very slow, steady dolly-in toward the cat in the oil painting. The cat remains s
 | 1차 생성 수 | 1회 | 1회 | 1회 |
 
 - 짧은 장면은 **속도를 올리지 말고 잘라서** 쓴다. 속도를 올리면 깜빡임·호흡이 빨라져 부자연스러워진다.
-- 장면 경계(0:02, 0:05)는 편집에서 6~8프레임 크로스페이드로 잇는다. 카메라 전진 속도를 맞춰 한 번의 연속 푸시처럼 보이게 한다.
+- 0:02 경계는 6~8프레임 크로스페이드로 잇는다(같은 구도라 연속 푸시처럼 보인다). 0:05는 음악 비트에 맞춘 하드 컷으로 공개감을 준다.
 
 ### 크레딧 절약안 (선택)
 
@@ -73,6 +86,8 @@ Very slow, steady dolly-in toward the cat in the oil painting. The cat remains s
 - [ ] 고양이 얼굴, 눈 색, 귀 모양, 털무늬, 체형이 원본과 같다
 - [ ] 고양이가 걷거나 고개를 돌리지 않는다 (깜빡임·호흡만 있다)
 - [ ] 새 고양이, 사람, 물체가 나타나지 않는다
+- [ ] 선반의 고양이 인형이 움직이거나 진짜 고양이로 바뀌지 않는다
+- [ ] 접힌 귀가 펴지지 않는다
 - [ ] 화면 안에 글자, 로고, 워터마크 형태가 생기지 않는다
 - [ ] 하단에 Meta AI 워터마크가 한 프레임도 보이지 않는다
 - [ ] 배경에서는 조명만 반짝이고 나머지는 정지해 있다
