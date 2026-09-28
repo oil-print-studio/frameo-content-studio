@@ -1,6 +1,6 @@
 # FRAME O 릴스·틱톡 시제 광고: 고양이 카페 유화 (10초)
 
-- **상태:** 초안, 승인 대기 중 (Runway 생성 전)
+- **상태:** 방향 승인 완료. 장면 1·2는 로컬 편집으로 제작 완료, 장면 3은 Runway 생성 전 최종 승인 대기
 - **포맷:** 세로 9:16 (1080×1920 편집 / Runway 720:1280 생성), 10초, 24fps
 - **핵심 메시지:** 평범한 반려동물 사진 한 장이 세상에 하나뿐인 공간과 유화 작품으로 완성된다.
 - **입력 소스:** `IMG1` 원본 고양이 사진, `IMG2` 고양이 카페 배경 유화 완성작 (크롭 결과물은 저장소에 커밋하지 않음)
@@ -92,3 +92,17 @@ Very slow, steady dolly-in toward the cat's face in the oil painting. The cat re
 - [ ] 하단에 Meta AI 워터마크가 한 프레임도 보이지 않는다
 - [ ] 배경에서는 조명만 반짝이고 나머지는 정지해 있다
 - [ ] 유화 질감(임파스토, 붓 자국)이 장면 3 전체에서 선명하다
+
+## 5. 1차 시제품 확정안 (승인 반영)
+
+- 장면 1: 편집 줌(1.00→1.03배, 2초). 장면 2: 붓 모양 마스크 전환(가장자리 → 얼굴 순, 줌 1.03→1.08배, 3초). 둘 다 로컬에서 제작, 크레딧 0.
+- 장면 3만 Runway Gen-4 Turbo로 생성: 이미지 투 비디오, 720:1280, 5초, 결과 1개, 업스케일·추가 생성 없음.
+- **수정:** 완성된 유화 작품을 보여주는 것이 목적이므로 눈 깜빡임과 호흡은 뺀다. 카메라 전진과 조명 반짝임만 허용한다.
+- 예상 크레딧: Gen-4 Turbo 초당 5크레딧 × 5초 = 25크레딧 (무료 계정 기본 125크레딧 중).
+- 무료 플랜 제약: 결과물 오른쪽 아래에 Runway 워터마크가 들어간다(내부 검토용). Gen-4.5는 무료 플랜에서 쓸 수 없어 최종본에는 유료 플랜이 필요하다.
+
+### 장면 3 최종 프롬프트 (Gen-4 Turbo)
+
+```
+Very slow, steady dolly-in toward the cat's face. This is a finished oil painting on canvas: the painted cat is a completely static artwork, with its face, eyes, folded ears, fur pattern and pose fixed exactly in place. Thick impasto brushstrokes and raised paint ridges catch the warm light as the camera glides closer. The string of fairy lights at the top twinkles softly and the warm window light glows gently. The figurines, plants, pastries and furniture remain perfectly still. Cozy, warm, premium gallery atmosphere.
+```
