@@ -4,6 +4,7 @@ import { buildAss, buildSrt, CAPTION_FONT, wrapLines } from "./captions";
 import { ffmpeg, filterPath, hashOf, writeAtomically } from "./media";
 import { FRAME, PLATFORMS } from "./platforms";
 import { resolveInProject } from "./store";
+import { resolveVoice, voiceLabel } from "./voice";
 import type { Cut, EditPlan, PlatformId, Project, SourceAsset, Timeline } from "./types";
 
 export type RenderProfileId = "preview" | "final";
@@ -41,13 +42,17 @@ function isPortrait(a: SourceAsset) {
 }
 
 /** 세로 소재는 꽉 채우고, 가로·정사각 소재는 흐린 배경 위에 전체를 보여 상품이 잘리지 않게 한다 */
-function frameGraph(a: SourceAsset, W: number, H: number, pre: string): string {
-  if (isPortrait(a)) return `[0:v]${pre}scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},setsar=1[v]`;
+function frameGraph(a: SourceAsset, W: number, H: number, pre: string, io: { input?: string; output?: string; tag?: string; post?: string } = {}): string {
+  const input = io.input ?? "[0:v]";
+  const output = io.output ?? "[v]";
+  const t = io.tag ?? "";
+  const post = io.post ? `,${io.post}` : "";
+  if (isPortrait(a)) return `${input}${pre}scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},setsar=1${post}${output}`;
   return [
-    `[0:v]${pre}split[a][b]`,
-    `[a]scale=${Math.round(W / 4)}:${Math.round(H / 4)}:force_original_aspect_ratio=increase,crop=${Math.round(W / 4)}:${Math.round(H / 4)},boxblur=8:2,eq=brightness=-0.10:saturation=0.8,scale=${W}:${H}[bg]`,
-    `[b]scale=${W}:${H}:force_original_aspect_ratio=decrease[fg]`,
-    `[bg][fg]overlay=(W-w)/2:(H-h)/2,setsar=1[v]`,
+    `${input}${pre}split[a${t}][b${t}]`,
+    `[a${t}]scale=${Math.round(W / 4)}:${Math.round(H / 4)}:force_original_aspect_ratio=increase,crop=${Math.round(W / 4)}:${Math.round(H / 4)},boxblur=8:2,eq=brightness=-0.10:saturation=0.8,scale=${W}:${H}[bg${t}]`,
+    `[b${t}]scale=${W}:${H}:force_original_aspect_ratio=decrease[fg${t}]`,
+    `[bg${t}][fg${t}]overlay=(W-w)/2:(H-h)/2,setsar=1${post}${output}`,
   ].join(";");
 }
 
@@ -56,12 +61,31 @@ const ENC = (crf: number, preset: string) => ["-c:v", "libx264", "-preset", pres
 async function renderCut(project: Project, asset: SourceAsset, c: Cut, profile: RenderProfile, index: number): Promise<{ file: string; reused: boolean }> {
   // 부동소수점 오차로 같은 컷의 캐시 키가 달라지지 않도록 ms 단위로 맞춘다
   const outDur = Math.round((c.outEnd - c.outStart) * 1000) / 1000;
-  const key = hashOf({ h: asset.hash, s: c.srcStart, e: c.srcEnd, d: outDur, f: c.fill, p: profile.id, v: 2, k: asset.kind === "image" ? index % 2 : 0 });
+  const revealHash = c.revealFromAssetId ? project.assets.find((a) => a.id === c.revealFromAssetId)?.hash : undefined;
+  const key = hashOf({ h: asset.hash, s: c.srcStart, e: c.srcEnd, d: outDur, f: c.fill, p: profile.id, v: 2, k: asset.kind === "image" ? index % 2 : 0, r: revealHash });
   const out = resolveInProject(project.id, path.join("cache", "cuts", `${key}.mp4`));
   if (await exists(out)) return { file: out, reused: true };
   await mkdir(path.dirname(out), { recursive: true });
   const src = resolveInProject(project.id, asset.path);
   const { width: W, height: H } = profile;
+
+  if (asset.kind === "image" && c.revealFromAssetId) {
+    // 원본 → 완성 작품: 원본을 보여 준 뒤 왼쪽에서 오른쪽으로 닦아 내듯 완성 작품으로 전환
+    const from = project.assets.find((a) => a.id === c.revealFromAssetId)!;
+    const hold = Math.max(0.6, outDur * 0.35);
+    const wipe = Math.min(1.0, Math.max(0.4, outDur * 0.25));
+    const font = filterPath(path.join(fontDir(), "Pretendard-Bold.otf"));
+    const label = (t: string) => `drawtext=fontfile='${font}':text='${t}':x=${Math.round(W * 0.06)}:y=${Math.round(H * 0.12)}:fontsize=${Math.round(W * 0.04)}:fontcolor=white:box=1:boxcolor=black@0.55:boxborderw=${Math.round(W * 0.012)}`;
+    const graph = [
+      frameGraph(from, W, H, `fps=${FRAME.fps},`, { input: "[0:v]", output: "[from]", tag: "1", post: label("원본") }),
+      frameGraph(asset, W, H, `fps=${FRAME.fps},`, { input: "[1:v]", output: "[to]", tag: "2", post: label("완성 작품") }),
+      `[from][to]xfade=transition=wipeleft:duration=${wipe.toFixed(2)}:offset=${hold.toFixed(2)},setsar=1[v]`,
+    ].join(";");
+    await writeAtomically(out, (tmp) =>
+      ffmpeg(["-loop", "1", "-t", outDur.toFixed(3), "-i", resolveInProject(project.id, from.path), "-loop", "1", "-t", outDur.toFixed(3), "-i", src, "-filter_complex", graph, "-map", "[v]", "-t", outDur.toFixed(3), ...ENC(profile.cutCrf, profile.preset), tmp]),
+    );
+    return { file: out, reused: false };
+  }
 
   if (asset.kind === "image") {
     // 사진형: 천천히 확대(짝수 컷) 또는 축소(홀수 컷). 실제 작동 영상처럼 꾸미지 않는다.
@@ -135,6 +159,10 @@ export interface RenderOutput {
   renderMs: number;
   reusedCuts: number;
   renderedCuts: number;
+  /** 사용한 음성 엔진 표시 */
+  voice: string;
+  /** 로컬 데모 음성이면 게시용이 아님 */
+  demoVoice: boolean;
 }
 
 /** 자막 없는 본편(컷 + 마지막 안내 배경). 모든 플랫폼이 공유한다 */
@@ -169,10 +197,12 @@ export async function renderPlatform(project: Project, plan: EditPlan, timeline:
 
   const assRel = path.join(dirRel, `${platform}.ass`);
   const srtRel = path.join(dirRel, `${platform}.srt`);
-  await writeFile(resolveInProject(project.id, assRel), buildAss(plan, timeline, platform, project.product));
+  const voice = resolveVoice(plan.voice);
+  const demoVoice = voice.provider === "local";
+  await writeFile(resolveInProject(project.id, assRel), buildAss(plan, timeline, platform, project.product, { demoVoice }));
   await writeFile(resolveInProject(project.id, srtRel), buildSrt(plan, timeline, platform));
 
-  const videoRel = path.join(dirRel, `${platform}.mp4`);
+  const videoRel = path.join(dirRel, `${platform}${demoVoice ? "_DEMO-VOICE" : ""}.mp4`);
   const total = timeline.totalDuration;
   const fonts = fontDir();
   await ffmpeg([
@@ -204,13 +234,15 @@ export async function renderPlatform(project: Project, plan: EditPlan, timeline:
     "48000",
     "-t",
     total.toFixed(3),
+    "-metadata",
+    `comment=voice=${voiceLabel(voice)}${demoVoice ? " (demo, not for publishing)" : ""}; plan=v${plan.version}`,
     "-movflags",
     "+faststart",
     resolveInProject(project.id, videoRel),
   ]);
 
   const { coverRel, coverGridRel } = await renderCover(project, plan, timeline, platform, base, dirRel);
-  return { platform, profile: profileId, videoRel, srtRel, assRel, coverRel, coverGridRel, renderMs: Date.now() - started, reusedCuts: reused, renderedCuts: rendered };
+  return { platform, profile: profileId, videoRel, srtRel, assRel, coverRel, coverGridRel, renderMs: Date.now() - started, reusedCuts: reused, renderedCuts: rendered, voice: voiceLabel(voice), demoVoice };
 }
 
 /** 표지: 시작 장면 위에 제목. 릴스는 프로필 격자(4:5)에서도 제목이 보이도록 가운데 영역에 둔다 */

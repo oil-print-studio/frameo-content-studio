@@ -47,7 +47,11 @@ export interface SourceAsset {
   /** 사용자 확인: 실제 판매 상품을 촬영한 소재인가. undefined = 아직 확인 안 함 */
   productConfirmed?: boolean;
   excluded?: boolean;
+  /** 소재 역할(사진 중심 상품용): 원본 사진 / 완성 작품 / 캔버스·설치 사진 / 상품·사용 장면 */
+  role?: AssetRole;
 }
+
+export type AssetRole = "before" | "after" | "canvas" | "product";
 
 export type SegmentStatus = "usable" | "review" | "excluded";
 
@@ -100,6 +104,8 @@ export interface Sentence {
   block: VoiceBlockId;
   /** 사용자가 고정한 문장·컷은 자동 수정에서 보존 */
   locked?: boolean;
+  /** reveal: segmentIds[0](원본) → segmentIds[1](완성) 으로 닦아 내듯 전환 */
+  sceneEffect?: "reveal";
 }
 
 export interface CaptionStyle {
@@ -153,6 +159,8 @@ export interface Cut {
   outEnd: number;
   /** 원본이 짧아 늘린 경우 */
   fill?: "none" | "slow" | "freeze";
+  /** 원본 사진에서 이 컷의 사진으로 전환(사진 컷 전용) */
+  revealFromAssetId?: string;
 }
 
 export interface Timeline {
@@ -165,6 +173,8 @@ export interface Timeline {
   cuts: Cut[];
   endCard: { start: number; end: number; assetId?: string };
   warnings: string[];
+  /** 실제 음성에서 검출한 말소리 시작 지점(쉼 직후). 긴 자막을 나눌 때 경계를 맞추는 데 쓴다 */
+  speechOnsets?: number[];
 }
 
 export type ReviewKind = "asset_unconfirmed" | "product_mismatch" | "unsupported_claim" | "timing_estimated" | "short_scene";
@@ -215,7 +225,12 @@ export interface Project {
 }
 
 export interface VerifyReport {
+  /** 기술 검사(형식·재생·동기화 등) 모두 통과 */
   ok: boolean;
+  /** 게시 가능: 기술 검사 통과 + 게시용 음성 + 미해결 확인 없음 */
+  publishable: boolean;
+  /** 게시 불가 이유 */
+  blockers: string[];
   file: string;
   checks: { name: string; ok: boolean; detail: string }[];
 }

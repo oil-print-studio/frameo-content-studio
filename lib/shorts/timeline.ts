@@ -31,6 +31,15 @@ export function buildTimeline(project: Project, plan: EditPlan, segments: Segmen
     const outEnd = i === plan.sentences.length - 1 ? speechEnd : timings[i + 1].start;
     let cursor = outStart;
     const queue = sentence.segmentIds.map((id) => segById.get(id)).filter((s): s is Segment => Boolean(s));
+    // 원본 → 완성 전환: 사진 두 장을 한 컷으로
+    if (sentence.sceneEffect === "reveal" && queue.length >= 2) {
+      const [from, to] = queue;
+      if (assetById.get(from.assetId)?.kind === "image" && assetById.get(to.assetId)?.kind === "image") {
+        usedSegs.add(from.id).add(to.id);
+        cuts.push({ sentenceId: sentence.id, assetId: to.assetId, segmentId: to.id, srcStart: 0, srcEnd: 0, outStart: round3(cursor), outEnd: round3(outEnd), fill: "none", revealFromAssetId: from.assetId });
+        return;
+      }
+    }
     if (!queue.length) {
       const fallback = spare()[0] ?? segments.find((s) => s.status !== "excluded");
       if (fallback) queue.push(fallback);

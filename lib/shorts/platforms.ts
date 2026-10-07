@@ -19,7 +19,12 @@ export interface PlatformProfile {
   topSafeY: number;
   /** 표지 제목을 둘 영역(위·아래 y). 릴스는 프로필 격자에서 가운데 4:5 영역만 보인다 */
   coverTextArea: { top: number; bottom: number };
-  endCardLine: (product: ProductCard) => string;
+  /** 마지막 안내 문구(구매 링크가 있을 때 / 없을 때) */
+  endCardText: { withUrl: string; withoutUrl: string };
+}
+
+export function endCardLine(p: PlatformProfile, product: Pick<ProductCard, "url">): string {
+  return product.url ? p.endCardText.withUrl : p.endCardText.withoutUrl;
 }
 
 const BASE_W = 1080;
@@ -36,7 +41,7 @@ export const PLATFORMS: Record<PlatformId, PlatformProfile> = {
     marginRight: 170,
     topSafeY: 200,
     coverTextArea: { top: 560, bottom: 1300 },
-    endCardLine: (p) => (p.url ? "구매 링크는 설명란과 고정 댓글에" : "자세한 정보는 설명란에"),
+    endCardText: { withUrl: "구매 정보는 채널 프로필 링크에서 확인하세요", withoutUrl: "자세한 정보는 채널 프로필에서 확인하세요" },
   },
   instagram_reels: {
     id: "instagram_reels",
@@ -46,7 +51,7 @@ export const PLATFORMS: Record<PlatformId, PlatformProfile> = {
     marginRight: 170,
     topSafeY: 240,
     coverTextArea: { top: GRID_4x5_TOP + 160, bottom: BASE_H - GRID_4x5_TOP - 160 },
-    endCardLine: (p) => (p.url ? "구매 링크는 프로필 링크에" : "자세한 정보는 프로필에"),
+    endCardText: { withUrl: "구매 링크는 프로필 링크에", withoutUrl: "자세한 정보는 프로필에" },
   },
   common: {
     id: "common",
@@ -57,9 +62,32 @@ export const PLATFORMS: Record<PlatformId, PlatformProfile> = {
     marginRight: 170,
     topSafeY: 240,
     coverTextArea: { top: GRID_4x5_TOP + 160, bottom: BASE_H - GRID_4x5_TOP - 160 },
-    endCardLine: (p) => (p.url ? "구매 링크는 설명란·프로필 링크에" : "자세한 정보는 설명란·프로필에"),
+    // 유튜브·인스타 모두 채널 프로필에 링크를 둘 수 있으므로 공용 문구도 프로필 기준
+    endCardText: { withUrl: "구매 정보는 채널 프로필 링크에서 확인하세요", withoutUrl: "자세한 정보는 채널 프로필에서 확인하세요" },
   },
 };
+
+const DEFAULTS: Record<PlatformId, PlatformProfile> = structuredClone(PLATFORMS);
+
+export type PlatformOverride = Partial<Omit<PlatformProfile, "id" | "label">>;
+
+/**
+ * 실제 앱 화면 확인 결과로 안전 영역·표지 영역·마지막 안내를 조정한다(서버에서 data/shorts/platforms.json 을 읽어 적용).
+ * 기본값 위에 덮어쓰며, 다시 호출하면 이전 조정은 버리고 새 값으로 바꾼다.
+ */
+export function applyPlatformOverrides(overrides: Partial<Record<PlatformId, PlatformOverride>> | undefined) {
+  for (const id of Object.keys(DEFAULTS) as PlatformId[]) {
+    const o = overrides?.[id] ?? {};
+    PLATFORMS[id] = {
+      ...DEFAULTS[id],
+      ...o,
+      coverTextArea: { ...DEFAULTS[id].coverTextArea, ...o.coverTextArea },
+      endCardText: { ...DEFAULTS[id].endCardText, ...o.endCardText },
+      id,
+      label: DEFAULTS[id].label,
+    };
+  }
+}
 
 export const PLATFORM_IDS: PlatformId[] = ["common", "youtube_shorts", "instagram_reels"];
 

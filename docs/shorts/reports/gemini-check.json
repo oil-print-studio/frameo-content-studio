@@ -1,0 +1,32 @@
+{
+  "at": "2026-10-07T09:59:49.838Z",
+  "keySet": false,
+  "models": {
+    "analysis": "gemini-3.8-flash",
+    "plan": "gemini-3.8-flash",
+    "tts": "gemini-3.8-flash-tts"
+  },
+  "rows": [
+    {
+      "step": "분석",
+      "model": "gemini-3.8-flash",
+      "ok": false,
+      "ms": 0,
+      "detail": "호출 안 함: GEMINI_API_KEY 없음"
+    },
+    {
+      "step": "대본",
+      "model": "gemini-3.8-flash",
+      "ok": false,
+      "ms": 0,
+      "detail": "호출 안 함: GEMINI_API_KEY 없음"
+    },
+    {
+      "step": "TTS",
+      "model": "gemini-3.8-flash-tts",
+      "ok": false,
+      "ms": 0,
+      "detail": "호출 안 함: GEMINI_API_KEY 없음"
+    }
+  ]
+}

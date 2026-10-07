@@ -89,7 +89,15 @@ pnpm shorts demo         # 합성 시험 소재로 입력 → 초안 → 저장 
 pnpm shorts draft <id>   # 초안(완료된 단계는 건너뛰고 이어서)
 pnpm shorts export <id> common,youtube_shorts,instagram_reels
 pnpm shorts edit <id> '{"op":"captionScale","scale":1.2}'
+pnpm shorts doctor       # 실행 환경 점검(FFmpeg·글꼴·음성 엔진·Gemini 키·모델)
+pnpm shorts gemini-check # Gemini 분석·대본·TTS 실제 호출 점검과 기록
+pnpm shorts make <product.json>   # 실제 소재로 입력 → 저장 → 검사 한 번에
+pnpm shorts measure <id> [플랫폼]  # 실제 발화 기준 자막 동기화·발음 측정
+pnpm shorts sync-bench [local|gemini]  # 숫자·영문 포함 50문장 측정
+pnpm shorts calibrate    # 인스타·유튜브 앱 확인용 눈금 영상·표지
 ```
+
+설치(운영체제별 의존성): [docs/shorts/INSTALL.md](docs/shorts/INSTALL.md) · 앱 화면 확인: [docs/shorts/CALIBRATION.md](docs/shorts/CALIBRATION.md)
 
 프로젝트는 `data/shorts/projects/<id>/` 에 저장됩니다(git 제외). 저장 패키지는 `export/v<계획 버전>/<플랫폼>/` 입니다.
 
@@ -139,7 +147,9 @@ lib/shorts/
 scripts/shorts.ts              명령줄 실행·검증
 ```
 
-단계별 결과 보고: [docs/shorts/STAGE_A_REPORT.md](docs/shorts/STAGE_A_REPORT.md)
+단계별 결과 보고: [단계 A](docs/shorts/STAGE_A_REPORT.md) · [실사용 준비](docs/shorts/REAL_USE_REPORT.md)
+
+로컬 데모 음성(espeak-ng)으로 만든 영상은 화면 표시·파일명(`_DEMO-VOICE`)·메타데이터·출력 검사에서 ‘게시 불가’로 구분됩니다.
 
 ## Out of scope for now
 

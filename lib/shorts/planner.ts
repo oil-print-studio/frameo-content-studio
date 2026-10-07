@@ -18,7 +18,8 @@ function blockOf(role: SentenceRole): VoiceBlockId {
 export function defaultCta(product: ProductCard, channelCta?: string): string {
   if (product.cta?.trim()) return asSentence(product.cta);
   if (channelCta?.trim()) return asSentence(channelCta);
-  return product.purpose === "affiliate" ? "제품 정보와 구매 링크는 아래 안내를 확인하세요." : "구매는 아래 안내 링크에서 하실 수 있어요.";
+  // 화면의 마지막 안내(유튜브·공용)와 같은 문구. 플랫폼 공통 음성이므로 프로필 링크 기준으로 말한다
+  return product.url ? "구매 정보는 채널 프로필 링크에서 확인하세요." : "자세한 정보는 채널 프로필에서 확인하세요.";
 }
 
 export function ruleHooks(product: ProductCard): string[] {
@@ -53,6 +54,7 @@ function interleave(segments: Segment[]): Segment[] {
  * 사용 가능 구간을 먼저 쓰고, 부족할 때만 확인 필요 구간을 쓴다(확인 항목으로 남음).
  */
 export function assignScenes(project: Project, sentences: Sentence[], segments: Segment[]): Sentence[] {
+  if (project.assets.some((a) => a.role && !a.excluded)) return assignByRole(project, sentences, segments);
   const candidates = segments.filter((s) => s.status !== "excluded");
   const videoSegs = interleave(candidates.filter((s) => s.end > s.start).sort((a, b) => rank(a) - rank(b)));
   const stills = candidates.filter((s) => s.end === s.start);
@@ -78,6 +80,33 @@ export function assignScenes(project: Project, sentences: Sentence[], segments: 
   });
 }
 
+/**
+ * 역할이 지정된 사진 중심 상품(예: 원본 사진 → 완성 작품 → 캔버스 사진).
+ * 시작은 원본, 사용 장면은 원본→완성 전환, 장점은 캔버스·완성 사진과 영상, 구매 안내는 완성 작품.
+ */
+function assignByRole(project: Project, sentences: Sentence[], segments: Segment[]): Sentence[] {
+  const live = segments.filter((s) => s.status !== "excluded");
+  const roleOf = (seg: Segment) => project.assets.find((a) => a.id === seg.assetId)?.role ?? "product";
+  const byRole = (r: string) => live.filter((s) => roleOf(s) === r);
+  const before = byRole("before");
+  const after = byRole("after");
+  // 캔버스·상품 사진이 모자라면 완성 작품을 섞어 같은 사진이 연달아 나오지 않게 한다
+  const detail = [...byRole("canvas"), ...byRole("product"), ...after.slice(1), ...after.slice(0, 1), ...before.slice(1)];
+  let di = 0;
+  const nextDetail = () => detail.length ? detail[di++ % detail.length] : (after[0] ?? before[0]);
+  return sentences.map((s) => {
+    if (s.locked && s.segmentIds.length) return s;
+    if (s.role === "hook" && before[0]) return { ...s, segmentIds: [before[0].id], sceneReason: "시작: 원본 사진", sceneEffect: undefined };
+    if (s.role === "demo" && before[0] && after[0])
+      return { ...s, segmentIds: [before[0].id, after[0].id], sceneReason: "원본 → 완성 작품 전환", sceneEffect: "reveal" as const };
+    if (s.role === "cta" && after[0]) return { ...s, segmentIds: [after[0].id], sceneReason: "구매 안내: 완성 작품", sceneEffect: undefined };
+    const seg = nextDetail();
+    const role = seg ? roleOf(seg) : undefined;
+    const label = role === "canvas" ? "캔버스·설치 사진" : role === "after" ? "완성 작품" : role === "before" ? "원본 사진" : "상품 장면";
+    return { ...s, segmentIds: seg ? [seg.id] : [], sceneReason: `장점: ${label}`, sceneEffect: undefined };
+  });
+}
+
 function rank(s: Segment): number {
   return s.status === "usable" ? 0 : 1;
 }
@@ -87,13 +116,19 @@ export function rulesScript(project: Project, hookIndex = 0): Sentence[] {
   const p = project.product;
   const facts = p.facts.filter((f) => f.approved).slice(0, 3);
   const hasVideo = project.assets.some((a) => a.kind === "video" && !a.excluded);
+  const live = project.assets.filter((a) => !a.excluded);
+  const hasBeforeAfter = live.some((a) => a.role === "before") && live.some((a) => a.role === "after");
   const hooks = ruleHooks(p);
   const sentences: Omit<Sentence, "segmentIds" | "sceneReason">[] = [
     { id: "s-hook", role: "hook", text: hooks[hookIndex % hooks.length], factIds: [], priority: 1, block: "hook" },
     {
       id: "s-demo",
       role: "demo",
-      text: hasVideo ? `${josa(p.name, "은/는")} 이렇게 사용합니다.` : `${josa(p.name, "을/를")} 자세히 보여드릴게요.`,
+      text: hasBeforeAfter
+        ? "원본 사진이 이렇게 바뀌었어요."
+        : hasVideo
+          ? `${josa(p.name, "은/는")} 이렇게 사용합니다.`
+          : `${josa(p.name, "을/를")} 자세히 보여드릴게요.`,
       factIds: [],
       priority: 2,
       block: "body",

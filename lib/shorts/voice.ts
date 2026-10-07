@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { mkdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { GEMINI_MODELS, hasGemini, synthesizeSpeech } from "./gemini";
@@ -11,7 +12,17 @@ const SENTENCE_GAP = 0.18;
 const BLOCK_GAP = 0.3;
 const BLOCK_ORDER: VoiceBlockId[] = ["hook", "body", "outro"];
 
-export const ESPEAK = process.env.ESPEAK_PATH || "espeak-ng";
+/** espeak-ng 위치: 환경변수 → 운영체제별 기본 설치 위치 → PATH */
+export function espeakPath(): string {
+  if (process.env.ESPEAK_PATH) return process.env.ESPEAK_PATH;
+  const candidates =
+    process.platform === "win32"
+      ? ["C:\\Program Files\\eSpeak NG\\espeak-ng.exe", "C:\\Program Files (x86)\\eSpeak NG\\espeak-ng.exe"]
+      : process.platform === "darwin"
+        ? ["/opt/homebrew/bin/espeak-ng", "/usr/local/bin/espeak-ng"]
+        : [];
+  return candidates.find((c) => existsSync(c)) ?? "espeak-ng";
+}
 
 /** 실제로 쓸 음성 엔진: Gemini 키가 없으면 로컬 엔진 */
 export function resolveVoice(v: VoiceSettings): VoiceSettings {
@@ -64,7 +75,7 @@ async function synthUnit(project: Project, v: VoiceSettings, text: string, task:
   if (v.provider === "gemini") {
     await writeFile(raw, await synthesizeSpeech(project.id, text, v.voice));
   } else {
-    await run(ESPEAK, ["-v", "ko", "-s", String(v.rate ?? 175), "-w", raw, text]);
+    await run(espeakPath(), ["-v", "ko", "-s", String(v.rate ?? 175), "-w", raw, text]);
     await logCall(project.id, { provider: "local", model: "espeak-ng", task, reused: false, ok: true, durationMs: Date.now() - started });
   }
   await normalizeWav(raw, file);

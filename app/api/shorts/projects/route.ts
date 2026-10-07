@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { startJob } from "@/lib/shorts/jobs";
 import { createProject, runDraft } from "@/lib/shorts/pipeline";
 import { MAX_UPLOAD_BYTES, productInputSchema } from "@/lib/shorts/schema";
+import type { AssetRole } from "@/lib/shorts/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -28,11 +29,14 @@ export async function POST(request: Request) {
   const total = files.reduce((n, f) => n + f.size, 0);
   if (total > MAX_UPLOAD_BYTES) return NextResponse.json({ error: "소재 용량이 너무 커요(합계 500MB 이하)." }, { status: 413 });
   let confirmed: boolean[] = [];
+  let roles: (string | null)[] = [];
   try {
     confirmed = JSON.parse(String(form.get("confirmed") ?? "[]"));
+    roles = JSON.parse(String(form.get("roles") ?? "[]"));
   } catch {
-    /* 확인 정보가 없으면 모두 미확인 */
+    /* 확인·역할 정보가 없으면 모두 미확인·역할 없음 */
   }
+  const roleOf = (i: number): AssetRole | undefined => (["before", "after", "canvas", "product"].includes(String(roles[i])) ? (roles[i] as AssetRole) : undefined);
 
   const p = parsed.data;
   try {
@@ -44,7 +48,7 @@ export async function POST(request: Request) {
         cta: p.cta,
         facts: p.facts.map((f, i) => ({ id: `f${i + 1}`, text: f.text, source: f.source, sourceNote: f.sourceNote, approved: true })),
       },
-      await Promise.all(files.map(async (f, i) => ({ name: f.name, data: Buffer.from(await f.arrayBuffer()), productConfirmed: Boolean(confirmed[i]) }))),
+      await Promise.all(files.map(async (f, i) => ({ name: f.name, data: Buffer.from(await f.arrayBuffer()), productConfirmed: Boolean(confirmed[i]), role: roleOf(i) }))),
     );
     startJob(project.id, "draft", () => runDraft(project.id));
     return NextResponse.json({ id: project.id }, { status: 201 });

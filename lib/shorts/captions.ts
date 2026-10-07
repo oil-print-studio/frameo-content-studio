@@ -1,4 +1,4 @@
-import { FRAME, PLATFORMS } from "./platforms";
+import { endCardLine, FRAME, PLATFORMS } from "./platforms";
 import type { CaptionStyle, EditPlan, PlatformId, ProductCard, Timeline } from "./types";
 
 export const CAPTION_FONT = "Pretendard ExtraBold";
@@ -47,6 +47,31 @@ export function wrapLines(text: string, maxWidth: number, fontSize: number): str
   return lines;
 }
 
+/**
+ * 두 줄을 넘는 문장은 비슷한 길이의 화면으로 나눈다(쉼표 뒤를 우선).
+ * 줄 단위로 자르면 마지막 단어 하나만 다음 화면에 남는 일이 생기므로 단어 경계에서 균형을 맞춘다.
+ */
+export function splitScreens(text: string, maxWidth: number, fontSize: number): string[][] {
+  const lines = wrapLines(text, maxWidth, fontSize);
+  if (lines.length <= MAX_LINES) return [lines];
+  const words = text.trim().split(/\s+/);
+  if (words.length < 2) return [lines.slice(0, MAX_LINES), ...splitScreens(lines.slice(MAX_LINES).join(" "), maxWidth, fontSize)];
+  const total = text.length;
+  let best = 1;
+  let bestScore = Infinity;
+  for (let i = 1; i < words.length; i++) {
+    const left = words.slice(0, i).join(" ");
+    const balance = Math.abs(left.length - (total - left.length));
+    // 쉼표·마침표 뒤에서 나누면 말의 쉼과 맞을 가능성이 높다
+    const score = balance - (/[,，、.]$/.test(words[i - 1]) ? total * 0.25 : 0);
+    if (score < bestScore) {
+      bestScore = score;
+      best = i;
+    }
+  }
+  return [...splitScreens(words.slice(0, best).join(" "), maxWidth, fontSize), ...splitScreens(words.slice(best).join(" "), maxWidth, fontSize)];
+}
+
 export interface CaptionChunk {
   sentenceId: string;
   start: number;
@@ -68,16 +93,21 @@ export function captionChunks(plan: EditPlan, timeline: Timeline, platform: Plat
     const t = timeline.sentences.find((x) => x.sentenceId === s.id);
     if (!t) continue;
     const text = (s.caption?.trim() || s.text).replace(/[.]$/, "");
-    const lines = wrapLines(text, maxWidth, fontSize);
-    const groups: string[][] = [];
-    for (let i = 0; i < lines.length; i += MAX_LINES) groups.push(lines.slice(i, i + MAX_LINES));
+    const groups = splitScreens(text, maxWidth, fontSize);
     const weights = groups.map((g) => g.join("").length);
     const total = weights.reduce((a, b) => a + b, 0) || 1;
-    let cursor = t.start;
+    // 화면 경계: 글자 비율 위치에서 가장 가까운 실제 말소리 시작(쉼 직후)에 맞춘다. 없으면 비율 그대로
+    const starts: number[] = [t.start];
+    let acc = 0;
+    for (let i = 1; i < groups.length; i++) {
+      acc += weights[i - 1];
+      const ratio = t.start + ((t.end - t.start) * acc) / total;
+      const lo = starts[i - 1] + 0.4;
+      const near = (timeline.speechOnsets ?? []).filter((o) => o > lo && o < t.end - 0.3 && Math.abs(o - ratio) <= 0.8);
+      starts.push(near.length ? near.reduce((a, b) => (Math.abs(b - ratio) < Math.abs(a - ratio) ? b : a)) : Math.max(ratio, lo));
+    }
     groups.forEach((g, i) => {
-      const len = ((t.end - t.start) * weights[i]) / total;
-      chunks.push({ sentenceId: s.id, start: cursor, end: cursor + len, lines: g, emphasis: s.emphasis });
-      cursor += len;
+      chunks.push({ sentenceId: s.id, start: starts[i], end: i + 1 < groups.length ? starts[i + 1] : t.end, lines: g, emphasis: s.emphasis });
     });
   }
   // 자막이 끊기지 않도록 다음 자막 시작까지 유지(최대 0.4초)
@@ -122,9 +152,13 @@ function withEmphasis(line: string, emphasis: string | undefined, style: Caption
   return `${safe.slice(0, idx)}{\\c${assColor(style.highlight)}&}${e}{\\c${assColor(style.color)}&}${safe.slice(idx + e.length)}`;
 }
 
+export const END_LINE_SIZE = 54;
+
 export const AFFILIATE_LABEL = "광고 · 제휴 링크로 수수료를 받을 수 있어요";
 
-export function buildAss(plan: EditPlan, timeline: Timeline, platform: PlatformId, product: ProductCard): string {
+export const DEMO_VOICE_LABEL = "데모 음성 · 게시용 아님";
+
+export function buildAss(plan: EditPlan, timeline: Timeline, platform: PlatformId, product: ProductCard, opts: { demoVoice?: boolean } = {}): string {
   const p = PLATFORMS[platform];
   const style = plan.captionStyle;
   const size = Math.round(BASE_FONT_SIZE * style.scale);
@@ -143,7 +177,8 @@ export function buildAss(plan: EditPlan, timeline: Timeline, platform: PlatformI
     `Style: Main,${CAPTION_FONT},${size},${assColor(style.color)},${assColor(style.color)},&H00000000,&H64000000,0,0,0,0,100,100,0,0,1,${outline},2,2,${p.marginLeft},${p.marginRight},${marginV},1`,
     `Style: Label,Pretendard SemiBold,34,&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,0,0,0,0,100,100,0,0,3,10,0,7,${p.marginLeft},${p.marginRight},${p.topSafeY},1`,
     `Style: EndTitle,${CAPTION_FONT},88,&H00FFFFFF,&H00FFFFFF,&H00000000,&H64000000,0,0,0,0,100,100,0,0,1,6,2,5,${p.marginLeft},${p.marginRight},0,1`,
-    `Style: EndLine,Pretendard Bold,54,${assColor(style.highlight)},${assColor(style.highlight)},&H00000000,&H64000000,0,0,0,0,100,100,0,0,1,5,2,5,${p.marginLeft},${p.marginRight},0,1`,
+    `Style: EndLine,Pretendard Bold,${END_LINE_SIZE},${assColor(style.highlight)},${assColor(style.highlight)},&H00000000,&H64000000,0,0,0,0,100,100,0,0,1,5,2,5,${p.marginLeft},${p.marginRight},0,1`,
+    `Style: Demo,Pretendard Bold,30,&H00FFFFFF,&H00FFFFFF,&H000000C0,&H600000C0,0,0,0,0,100,100,0,0,3,8,0,9,40,40,${Math.max(40, p.topSafeY - 120)},1`,
     "",
     "[Events]",
     "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",
@@ -161,7 +196,13 @@ export function buildAss(plan: EditPlan, timeline: Timeline, platform: PlatformI
   const cx = Math.round((p.marginLeft + FRAME.width - p.marginRight) / 2);
   const titleLines = wrapLines(product.name, FRAME.width - p.marginLeft - p.marginRight, 88).slice(0, 2);
   events.push(`Dialogue: 3,${assTime(timeline.endCard.start)},${assTime(timeline.endCard.end)},EndTitle,,0,0,0,,{\\pos(${cx},860)\\fad(150,0)}${titleLines.map(escapeAss).join("\\N")}`);
-  events.push(`Dialogue: 3,${assTime(timeline.endCard.start)},${assTime(timeline.endCard.end)},EndLine,,0,0,0,,{\\pos(${cx},1060)\\fad(250,0)}${escapeAss(p.endCardLine(product))}`);
+  // 안내 문구는 글자를 줄이지 않고 두 줄까지 줄바꿈
+  const endLines = wrapLines(endCardLine(p, product), FRAME.width - p.marginLeft - p.marginRight, END_LINE_SIZE).slice(0, 2);
+  events.push(`Dialogue: 3,${assTime(timeline.endCard.start)},${assTime(timeline.endCard.end)},EndLine,,0,0,0,,{\\pos(${cx},1080)\\fad(250,0)}${endLines.map(escapeAss).join("\\N")}`);
+  if (opts.demoVoice) {
+    // 로컬 데모 음성 영상은 화면에 표시해 실수로 게시되지 않게 한다
+    events.push(`Dialogue: 4,${assTime(0)},${assTime(timeline.totalDuration)},Demo,,0,0,0,,${DEMO_VOICE_LABEL}`);
+  }
   return [...header, ...events, ""].join("\n");
 }
 

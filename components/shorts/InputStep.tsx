@@ -3,7 +3,7 @@
 import { useState } from "react";
 import ui from "@/components/ui.module.css";
 import styles from "@/app/shorts/page.module.css";
-import type { FactSource } from "@/lib/shorts/types";
+import type { AssetRole, FactSource } from "@/lib/shorts/types";
 
 interface FactRow {
   text: string;
@@ -13,7 +13,15 @@ interface FactRow {
 interface FileRow {
   file: File;
   confirmed: boolean;
+  role: AssetRole | "";
 }
+
+const ROLE_LABEL: Record<AssetRole, string> = {
+  before: "원본 사진",
+  after: "완성 작품",
+  canvas: "캔버스·설치 사진",
+  product: "상품·사용 장면",
+};
 
 const SOURCE_LABEL: Record<FactSource, string> = {
   user: "직접 확인",
@@ -40,7 +48,7 @@ export function InputStep({ busy, onCreated }: { busy: boolean; onCreated: (id: 
 
   function addFiles(list: FileList | null) {
     if (!list) return;
-    setFiles((prev) => [...prev, ...Array.from(list).map((file) => ({ file, confirmed: false }))]);
+    setFiles((prev) => [...prev, ...Array.from(list).map((file) => ({ file, confirmed: false, role: "" as const }))]);
   }
 
   async function submit() {
@@ -49,6 +57,7 @@ export function InputStep({ busy, onCreated }: { busy: boolean; onCreated: (id: 
     const form = new FormData();
     form.set("product", JSON.stringify({ name, purpose, url, cta, facts: facts.filter((f) => f.text.trim()) }));
     form.set("confirmed", JSON.stringify(files.map((f) => f.confirmed)));
+    form.set("roles", JSON.stringify(files.map((f) => f.role || null)));
     for (const f of files) form.append("files", f.file);
     try {
       const res = await fetch("/api/shorts/projects", { method: "POST", body: form });
@@ -132,6 +141,19 @@ export function InputStep({ busy, onCreated }: { busy: boolean; onCreated: (id: 
               {files.map((f, i) => (
                 <li key={`${f.file.name}-${i}`}>
                   <span className={styles.fileName}>{f.file.name}</span>
+                  <select
+                    className={styles.select}
+                    aria-label="소재 역할"
+                    value={f.role}
+                    onChange={(e) => setFiles((prev) => prev.map((x, j) => (j === i ? { ...x, role: e.target.value as AssetRole | "" } : x)))}
+                  >
+                    <option value="">역할 지정 안 함</option>
+                    {(Object.keys(ROLE_LABEL) as AssetRole[]).map((r) => (
+                      <option key={r} value={r}>
+                        {ROLE_LABEL[r]}
+                      </option>
+                    ))}
+                  </select>
                   <label className={ui.checkbox}>
                     <input type="checkbox" checked={f.confirmed} onChange={(e) => setFiles((prev) => prev.map((x, j) => (j === i ? { ...x, confirmed: e.target.checked } : x)))} />
                     판매 상품 촬영본 맞음
@@ -143,7 +165,7 @@ export function InputStep({ busy, onCreated }: { busy: boolean; onCreated: (id: 
               ))}
             </ul>
           )}
-          <span className={ui.hint}>‘소재 찾기’(외부 탐색·가져오기)는 다음 단계에서 붙여요. 지금은 가진 파일로 만들어요.</span>
+          <span className={ui.hint}>원본 사진·완성 작품을 지정하면 ‘원본 → 완성’ 전환 장면을 만들어요. ‘소재 찾기’(외부 탐색)는 다음 단계에서 붙여요.</span>
         </div>
 
         <details className={styles.more}>

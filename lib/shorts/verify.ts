@@ -1,7 +1,7 @@
-import { BASE_FONT_SIZE, captionChunks, textWidth } from "./captions";
+import { BASE_FONT_SIZE, captionChunks, END_LINE_SIZE, textWidth, wrapLines } from "./captions";
 import { ffmpeg, probe } from "./media";
-import { FRAME, PLATFORMS } from "./platforms";
-import type { EditPlan, PlatformId, ReviewItem, Timeline, VerifyReport } from "./types";
+import { endCardLine, FRAME, PLATFORMS } from "./platforms";
+import type { EditPlan, PlatformId, ProductCard, ReviewItem, Timeline, VerifyReport } from "./types";
 
 /**
  * 완성본 검사. 파일 존재만으로 완료 판정하지 않는다.
@@ -9,7 +9,7 @@ import type { EditPlan, PlatformId, ReviewItem, Timeline, VerifyReport } from ".
  */
 export async function verifyOutput(
   file: string,
-  expected: { width: number; height: number; timeline: Timeline; plan: EditPlan; platform: PlatformId; review: ReviewItem[] },
+  expected: { width: number; height: number; timeline: Timeline; plan: EditPlan; platform: PlatformId; review: ReviewItem[]; product: ProductCard; demoVoice: boolean; voice: string },
 ): Promise<VerifyReport> {
   const checks: VerifyReport["checks"] = [];
   const add = (name: string, ok: boolean, detail: string) => checks.push({ name, ok, detail });
@@ -20,7 +20,7 @@ export async function verifyOutput(
     info = await probe(file);
   } catch (err) {
     add("파일 읽기", false, (err as Error).message);
-    return { ok: false, file, checks };
+    return { ok: false, publishable: false, blockers: ["파일을 읽지 못함"], file, checks };
   }
   const v = info.streams.find((s) => s.codec_type === "video");
   const a = info.streams.find((s) => s.codec_type === "audio");
@@ -58,13 +58,19 @@ export async function verifyOutput(
   const overflow = chunks.filter((c) => c.lines.length > 2 || c.lines.some((l) => textWidth(l, size) > maxW + 1));
   const tooTall = chunks.some((c) => p.captionBottomY - c.lines.length * size * 1.25 < p.topSafeY);
   add("자막 두 줄·안전 영역 이내", overflow.length === 0 && !tooTall, overflow.length ? `${overflow.length}개 자막이 넘침` : `${chunks.length}개 자막 확인`);
-  const endLine = p.endCardLine({ name: "", purpose: "own", facts: [], confirmedAt: "", url: "x", id: "" });
-  add("마지막 안내 글자 잘림 없음", textWidth(endLine, 54) <= maxW, endLine);
+  const endText = endCardLine(p, expected.product);
+  const endLines = wrapLines(endText, maxW, END_LINE_SIZE);
+  add("마지막 안내 글자 잘림 없음", endLines.length <= 2 && endLines.every((l) => textWidth(l, END_LINE_SIZE) <= maxW), `${endText} (${endLines.length}줄)`);
 
   const blocking = expected.review.filter((r) => r.blocking);
   add("미해결 상품·주장 확인 항목 없음", blocking.length === 0, blocking.length ? blocking.map((b) => b.message).join(" / ") : "없음");
 
-  return { ok: checks.every((c) => c.ok), file, checks };
+  const ok = checks.every((c) => c.ok);
+  const blockers = [
+    ...(ok ? [] : ["출력 검사 실패"]),
+    ...(expected.demoVoice ? [`로컬 데모 음성(${expected.voice}) — 게시용 음성(Gemini TTS 등)으로 다시 만들어야 함`] : []),
+  ];
+  return { ok, publishable: blockers.length === 0, blockers, file, checks };
 }
 
 export async function measureSync(file: string, timeline: Timeline) {

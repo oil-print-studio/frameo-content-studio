@@ -1,0 +1,26 @@
+{
+  "file": "/home/user/frameo-content-studio/data/shorts/projects/pmuxybzug-fe6a82/export/v1/common/FRAME_O_유화_캔버스_common_DEMO-VOICE.mp4",
+  "voice": "로컬 테스트 음성(espeak-ng)",
+  "sentences": {
+    "total": 5,
+    "measured": 5,
+    "within": 5,
+    "rate": 1,
+    "medianMs": 11,
+    "p95Ms": 28,
+    "maxMs": 28,
+    "pass": true
+  },
+  "chunks": {
+    "total": 6,
+    "measured": 5,
+    "within": 5,
+    "rate": 0.8333333333333334,
+    "medianMs": 11,
+    "p95Ms": 28,
+    "maxMs": 28,
+    "pass": false
+  },
+  "avgCer": 0.8703333333333334,
+  "measuredAt": "2026-10-07T10:17:26.702Z"
+}

@@ -67,7 +67,14 @@ export function SaveStep({ view, onChanged }: { view: ProjectViewData; onChanged
                 <div className={styles.outputBody}>
                   <h3 className={styles.h3}>
                     {PLATFORMS[o.platform].label} <span className={o.verify.ok ? styles.ok : styles.fail}>{o.verify.ok ? "검사 통과" : "검사 실패"}</span>
+                    <span className={o.verify.publishable ? styles.ok : styles.fail}>{o.verify.publishable ? "게시 가능" : "게시 불가"}</span>
                   </h3>
+                  <p className={styles.reason}>음성: {o.voice}</p>
+                  {o.verify.blockers?.map((b) => (
+                    <p key={b} className={styles.fail}>
+                      {b}
+                    </p>
+                  ))}
                   <div className={styles.downloads}>
                     <a className={ui.ghostButton} href={fileUrl(id, o.videoRel, { download: true })}>
                       MP4

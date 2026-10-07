@@ -1,0 +1,25 @@
+{
+  "_설명": "실제 앱 캡처에서 읽은 눈금 값을 적으면 다음 렌더부터 적용됩니다. 쓰지 않는 항목은 지워도 됩니다.",
+  "instagram_reels": {
+    "captionBottomY": 1290,
+    "marginRight": 170,
+    "topSafeY": 240,
+    "coverTextArea": {
+      "top": 445,
+      "bottom": 1475
+    }
+  },
+  "youtube_shorts": {
+    "captionBottomY": 1380,
+    "marginRight": 170,
+    "topSafeY": 200
+  },
+  "common": {
+    "captionBottomY": 1290,
+    "marginRight": 170,
+    "coverTextArea": {
+      "top": 445,
+      "bottom": 1475
+    }
+  }
+}

@@ -1,0 +1,730 @@
+{
+  "voice": "로컬 테스트 음성(espeak-ng)",
+  "sentences": {
+    "total": 50,
+    "measured": 50,
+    "within": 50,
+    "rate": 1,
+    "medianMs": 12,
+    "p95Ms": 29,
+    "maxMs": 30,
+    "pass": true
+  },
+  "chunks": {
+    "total": 53,
+    "measured": 50,
+    "within": 50,
+    "rate": 0.9433962264150944,
+    "medianMs": 12,
+    "p95Ms": 29,
+    "maxMs": 30,
+    "pass": true
+  },
+  "points": [
+    {
+      "id": "b0-0",
+      "text": "FRAME O는 사진을 유화 느낌의 캔버스 작품으로 만들어요.",
+      "captionStart": 0,
+      "speechOnset": 0,
+      "errorMs": 0
+    },
+    {
+      "id": "b0-1",
+      "text": "원본 사진 한 장이면 시작할 수 있어요.",
+      "captionStart": 4.368,
+      "speechOnset": 4.369,
+      "errorMs": -1
+    },
+    {
+      "id": "b0-2",
+      "text": "캔버스 크기는 30x40cm부터 고를 수 있어요.",
+      "captionStart": 7.618,
+      "speechOnset": 7.646,
+      "errorMs": -28
+    },
+    {
+      "id": "b0-3",
+      "text": "가장 큰 사이즈는 60x90cm예요.",
+      "captionStart": 12.415,
+      "speechOnset": 12.428,
+      "errorMs": -13
+    },
+    {
+      "id": "b0-4",
+      "text": "주문 후 제작까지 약 7일이 걸려요.",
+      "captionStart": 16.295,
+      "speechOnset": 16.321,
+      "errorMs": -26
+    },
+    {
+      "id": "b1-0",
+      "text": "작업 과정은 모두 3단계로 진행돼요.",
+      "captionStart": 0,
+      "speechOnset": 0,
+      "errorMs": 0
+    },
+    {
+      "id": "b1-1",
+      "text": "반려동물 사진도 작품으로 만들 수 있어요.",
+      "captionStart": 3.388,
+      "speechOnset": 3.417,
+      "errorMs": -29
+    },
+    {
+      "id": "b1-2",
+      "text": "가족사진을 거실에 걸기 좋은 작품으로 바꿔 드려요.",
+      "captionStart": 6.745,
+      "speechOnset": 6.758,
+      "errorMs": -13
+    },
+    {
+      "id": "b1-3",
+      "text": "완성 전에 시안을 먼저 보여 드려요.",
+      "captionStart": 10.65,
+      "speechOnset": 10.651,
+      "errorMs": -1
+    },
+    {
+      "id": "b1-4",
+      "text": "수정은 한 번 더 요청할 수 있어요.",
+      "captionStart": 13.524,
+      "speechOnset": 13.535,
+      "errorMs": -11
+    },
+    {
+      "id": "b2-0",
+      "text": "액자 없이 캔버스만 받을 수도 있어요.",
+      "captionStart": 0,
+      "speechOnset": 0,
+      "errorMs": 0
+    },
+    {
+      "id": "b2-1",
+      "text": "포장은 모서리 보호대를 넣어 보내요.",
+      "captionStart": 3.095,
+      "speechOnset": 3.124,
+      "errorMs": -29
+    },
+    {
+      "id": "b2-2",
+      "text": "작품 뒷면에는 걸이용 고리가 달려 있어요.",
+      "captionStart": 5.693,
+      "speechOnset": 5.719,
+      "errorMs": -26
+    },
+    {
+      "id": "b2-3",
+      "text": "A4 크기의 작은 작품도 만들 수 있어요.",
+      "captionStart": 9.094,
+      "speechOnset": 9.101,
+      "errorMs": -7
+    },
+    {
+      "id": "b2-4",
+      "text": "인스타그램 DM으로 사진을 보내 주셔도 돼요.",
+      "captionStart": 12.619,
+      "speechOnset": 12.619,
+      "errorMs": 0
+    },
+    {
+      "id": "b3-0",
+      "text": "카카오톡 채널에서도 상담할 수 있어요.",
+      "captionStart": 0,
+      "speechOnset": 0,
+      "errorMs": 0
+    },
+    {
+      "id": "b3-1",
+      "text": "웨딩 사진을 기념 작품으로 남겨 보세요.",
+      "captionStart": 3.359,
+      "speechOnset": 3.36,
+      "errorMs": -1
+    },
+    {
+      "id": "b3-2",
+      "text": "아이의 100일 사진도 많이 주문하세요.",
+      "captionStart": 6.604,
+      "speechOnset": 6.604,
+      "errorMs": 0
+    },
+    {
+      "id": "b3-3",
+      "text": "1년 전 여행 사진이 벽에 걸린 작품이 돼요.",
+      "captionStart": 9.361,
+      "speechOnset": 9.361,
+      "errorMs": 0
+    },
+    {
+      "id": "b3-4",
+      "text": "배송은 2일에서 3일 정도 걸려요.",
+      "captionStart": 13.151,
+      "speechOnset": 13.18,
+      "errorMs": -29
+    },
+    {
+      "id": "b4-0",
+      "text": "사진 해상도는 1080픽셀 이상이면 좋아요.",
+      "captionStart": 0,
+      "speechOnset": 0,
+      "errorMs": 0
+    },
+    {
+      "id": "b4-1",
+      "text": "스마트폰으로 찍은 사진도 충분해요.",
+      "captionStart": 4.279,
+      "speechOnset": 4.291,
+      "errorMs": -12
+    },
+    {
+      "id": "b4-2",
+      "text": "iPhone 15로 찍은 사진으로 만든 예시예요.",
+      "captionStart": 7.38,
+      "speechOnset": 7.387,
+      "errorMs": -7
+    },
+    {
+      "id": "b4-3",
+      "text": "Galaxy S24 사진도 선명하게 표현돼요.",
+      "captionStart": 10.836,
+      "speechOnset": 10.866,
+      "errorMs": -30
+    },
+    {
+      "id": "b4-4",
+      "text": "색감은 따뜻한 톤과 차가운 톤 중에 고를 수 있어요.",
+      "captionStart": 14.909,
+      "speechOnset": 14.921,
+      "errorMs": -12
+    },
+    {
+      "id": "b5-0",
+      "text": "배경을 단순하게 정리해 드릴 수도 있어요.",
+      "captionStart": 0,
+      "speechOnset": 0,
+      "errorMs": 0
+    },
+    {
+      "id": "b5-1",
+      "text": "여러 사람이 나온 사진은 최대 5명까지 가능해요.",
+      "captionStart": 3.459,
+      "speechOnset": 3.46,
+      "errorMs": -1
+    },
+    {
+      "id": "b5-2",
+      "text": "선물용 포장은 2000원이 추가돼요.",
+      "captionStart": 7.181,
+      "speechOnset": 7.194,
+      "errorMs": -13
+    },
+    {
+      "id": "b5-3",
+      "text": "선물 받는 분 주소로 바로 보낼 수 있어요.",
+      "captionStart": 10.363,
+      "speechOnset": 10.376,
+      "errorMs": -13
+    },
+    {
+      "id": "b5-4",
+      "text": "주문은 frameoart.com에서 할 수 있어요.",
+      "captionStart": 13.849,
+      "speechOnset": 13.876,
+      "errorMs": -27
+    },
+    {
+      "id": "b6-0",
+      "text": "프로필 링크를 누르면 주문 페이지로 이동해요.",
+      "captionStart": 0,
+      "speechOnset": 0,
+      "errorMs": 0
+    },
+    {
+      "id": "b6-1",
+      "text": "작품마다 제작 번호가 붙어 있어요.",
+      "captionStart": 3.655,
+      "speechOnset": 3.681,
+      "errorMs": -26
+    },
+    {
+      "id": "b6-2",
+      "text": "제작 번호는 FO-2026-0123 같은 형식이에요.",
+      "captionStart": 6.5,
+      "speechOnset": 6.526,
+      "errorMs": -26
+    },
+    {
+      "id": "b6-3",
+      "text": "캔버스 두께는 2.5cm예요.",
+      "captionStart": 11.875,
+      "speechOnset": 11.904,
+      "errorMs": -29
+    },
+    {
+      "id": "b6-4",
+      "text": "벽에 걸었을 때 옆면까지 그림이 이어져요.",
+      "captionStart": 14.399,
+      "speechOnset": 14.428,
+      "errorMs": -29
+    },
+    {
+      "id": "b7-0",
+      "text": "LED 조명 아래에서도 반사가 적어요.",
+      "captionStart": 0,
+      "speechOnset": 0,
+      "errorMs": 0
+    },
+    {
+      "id": "b7-1",
+      "text": "UV 코팅으로 마감해요.",
+      "captionStart": 3.156,
+      "speechOnset": 3.163,
+      "errorMs": -7
+    },
+    {
+      "id": "b7-2",
+      "text": "오래된 흑백 사진도 색을 입혀 드릴 수 있어요.",
+      "captionStart": 5.269,
+      "speechOnset": 5.27,
+      "errorMs": -1
+    },
+    {
+      "id": "b7-3",
+      "text": "원본과 완성 작품을 나란히 비교해 보세요.",
+      "captionStart": 8.826,
+      "speechOnset": 8.826,
+      "errorMs": 0
+    },
+    {
+      "id": "b7-4",
+      "text": "붓 터치가 살아 있는 질감이 특징이에요.",
+      "captionStart": 12.493,
+      "speechOnset": 12.521,
+      "errorMs": -28
+    },
+    {
+      "id": "b8-0",
+      "text": "가까이에서 보면 물감 결이 느껴져요.",
+      "captionStart": 0,
+      "speechOnset": 0,
+      "errorMs": 0
+    },
+    {
+      "id": "b8-1",
+      "text": "작은 방에는 40x50cm 크기를 추천해요.",
+      "captionStart": 2.985,
+      "speechOnset": 3.011,
+      "errorMs": -26
+    },
+    {
+      "id": "b8-2",
+      "text": "거실 소파 위에는 50x70cm가 잘 어울려요.",
+      "captionStart": 7.574,
+      "speechOnset": 7.588,
+      "errorMs": -14
+    },
+    {
+      "id": "b8-3",
+      "text": "부모님 결혼 30주년 선물로도 좋아요.",
+      "captionStart": 12.046,
+      "speechOnset": 12.075,
+      "errorMs": -29
+    },
+    {
+      "id": "b8-4",
+      "text": "졸업 사진을 작품으로 남기는 분도 많아요.",
+      "captionStart": 15.822,
+      "speechOnset": 15.849,
+      "errorMs": -27
+    },
+    {
+      "id": "b9-0",
+      "text": "주문 전에 사진이 적합한지 무료로 확인해 드려요.",
+      "captionStart": 0,
+      "speechOnset": 0,
+      "errorMs": 0
+    },
+    {
+      "id": "b9-1",
+      "text": "궁금한 점은 댓글로 남겨 주세요.",
+      "captionStart": 3.941,
+      "speechOnset": 3.955,
+      "errorMs": -14
+    },
+    {
+      "id": "b9-2",
+      "text": "다음 영상에서는 제작 과정을 보여 드릴게요.",
+      "captionStart": 6.847,
+      "speechOnset": 6.86,
+      "errorMs": -13
+    },
+    {
+      "id": "b9-3",
+      "text": "오늘 소개한 작품은 60x90cm 캔버스예요.",
+      "captionStart": 10.332,
+      "speechOnset": 10.332,
+      "errorMs": 0
+    },
+    {
+      "id": "b9-4",
+      "text": "구매 정보는 채널 프로필 링크에서 확인하세요.",
+      "captionStart": 15.047,
+      "speechOnset": 15.059,
+      "errorMs": -12
+    }
+  ],
+  "intelligibility": [
+    {
+      "id": "b0-0",
+      "text": "FRAME O는 사진을 유화 느낌의 캔버스 작품으로 만들어요.",
+      "heard": "사 임을 요구 하기 누노 과 UDV 계열 러스 자 보비 로마 의 [2] 억여",
+      "cer": 1,
+      "hasLatin": true
+    },
+    {
+      "id": "b0-1",
+      "text": "원본 사진 한 장이면 시작할 수 있어요.",
+      "heard": "원으로 사기 다 유착 이 여의치 이다 가 옥소 있어요",
+      "cer": 0.933,
+      "hasLatin": false
+    },
+    {
+      "id": "b0-2",
+      "text": "캔버스 크기는 30x40cm부터 고를 수 있어요.",
+      "heard": "러스 근기 눈싸움 [2] 백 [4] 지향 저 도 리어 수 있어요",
+      "cer": 0.778,
+      "hasLatin": true
+    },
+    {
+      "id": "b0-3",
+      "text": "가장 큰 사이즈는 60x90cm예요.",
+      "heard": "하자 그 의 사위 조 [9] 렙 [9] 지아비 의 요",
+      "cer": 1,
+      "hasLatin": true
+    },
+    {
+      "id": "b0-4",
+      "text": "주문 후 제작까지 약 7일이 걸려요.",
+      "heard": "조 목포 제주 까지 이어 취임 이 너 넒 혀",
+      "cer": 0.786,
+      "hasLatin": false
+    },
+    {
+      "id": "b1-0",
+      "text": "작업 과정은 모두 3단계로 진행돼요.",
+      "heard": "저 도 과 적 유모 복사압 나게 로 이 기사 읽기 연",
+      "cer": 1,
+      "hasLatin": false
+    },
+    {
+      "id": "b1-1",
+      "text": "반려동물 사진도 작품으로 만들 수 있어요.",
+      "heard": "박 현옥 모 사기 는 자 보비 로마 유혹 있어요",
+      "cer": 0.706,
+      "hasLatin": false
+    },
+    {
+      "id": "b1-2",
+      "text": "가족사진을 거실에 걸기 좋은 작품으로 바꿔 드려요.",
+      "heard": "남쪽 사지 는 러시 NAGI 조율자 고비 로 다 화류 여유",
+      "cer": 0.905,
+      "hasLatin": false
+    },
+    {
+      "id": "b1-3",
+      "text": "완성 전에 시안을 먼저 보여 드려요.",
+      "heard": "와 있어 저 렉스 열어보 어류 여겼",
+      "cer": 0.929,
+      "hasLatin": false
+    },
+    {
+      "id": "b1-4",
+      "text": "수정은 한 번 더 요청할 수 있어요.",
+      "heard": "부적 이 다 더 일어 영어 바오 수 있어요",
+      "cer": 0.846,
+      "hasLatin": false
+    },
+    {
+      "id": "b2-0",
+      "text": "액자 없이 캔버스만 받을 수도 있어요.",
+      "heard": "[2] 차 어 그래 너 쓸만 하다고 요소 도 있어요",
+      "cer": 0.8,
+      "hasLatin": false
+    },
+    {
+      "id": "b2-1",
+      "text": "포장은 모서리 보호대를 넣어 보내요.",
+      "heard": "보자기 의 목소리 도 오래 누렇 고 네요",
+      "cer": 0.933,
+      "hasLatin": false
+    },
+    {
+      "id": "b2-2",
+      "text": "작품 뒷면에는 걸이용 고리가 달려 있어요.",
+      "heard": "저 봄 보임 여기 도 너 리오 노리 다 려 있어요",
+      "cer": 0.765,
+      "hasLatin": false
+    },
+    {
+      "id": "b2-3",
+      "text": "A4 크기의 작은 작품도 만들 수 있어요.",
+      "heard": "했어 그 이유 죠 그 죠 동로마 유혹 있어요",
+      "cer": 0.867,
+      "hasLatin": true
+    },
+    {
+      "id": "b2-4",
+      "text": "인스타그램 DM으로 사진을 보내 주셔도 돼요.",
+      "heard": "INS 자 레무 리아 물로 사기 도 보다 죠 여독 OST",
+      "cer": 0.824,
+      "hasLatin": true
+    },
+    {
+      "id": "b3-0",
+      "text": "카카오톡 채널에서도 상담할 수 있어요.",
+      "heard": "가 [9] 시 할거 리더 로써 이런 파오후 있어요",
+      "cer": 0.875,
+      "hasLatin": false
+    },
+    {
+      "id": "b3-1",
+      "text": "웨딩 사진을 기념 작품으로 남겨 보세요.",
+      "heard": "웨디 잎사귀 는 이 영 [쩜] [공] 위로 하며 여보세요",
+      "cer": 0.75,
+      "hasLatin": false
+    },
+    {
+      "id": "b3-2",
+      "text": "아이의 100일 사진도 많이 주문하세요.",
+      "heard": "아 휴 이 없어지 므로 맛있 죠 - 요",
+      "cer": 0.867,
+      "hasLatin": false
+    },
+    {
+      "id": "b3-3",
+      "text": "1년 전 여행 사진이 벽에 걸린 작품이 돼요.",
+      "heard": "이 [10] 저 여백사 뒤 역외 더디 유저 보비 고요",
+      "cer": 0.824,
+      "hasLatin": false
+    },
+    {
+      "id": "b3-4",
+      "text": "배송은 2일에서 3일 정도 걸려요.",
+      "heard": "델 석유 뒤 에서 [4] R B 전 로 덮 혀",
+      "cer": 0.857,
+      "hasLatin": false
+    },
+    {
+      "id": "b4-0",
+      "text": "사진 해상도는 1080픽셀 이상이면 좋아요.",
+      "heard": "그러나 이 잘써 될수 W 쥐어 다 주 겠지 이 서기 여호와 여",
+      "cer": 1.111,
+      "hasLatin": false
+    },
+    {
+      "id": "b4-1",
+      "text": "스마트폰으로 찍은 사진도 충분해요.",
+      "heard": "주 로 사기 쥐고 못해 요",
+      "cer": 0.733,
+      "hasLatin": false
+    },
+    {
+      "id": "b4-2",
+      "text": "iPhone 15로 찍은 사진으로 만든 예시예요.",
+      "heard": "아 있어 위주 라 그 사기 노란 눈 예요",
+      "cer": 0.867,
+      "hasLatin": true
+    },
+    {
+      "id": "b4-3",
+      "text": "Galaxy S24 사진도 선명하게 표현돼요.",
+      "heard": "나갔을 약시 자 자기 일 로써 유업 학 연구 에 요",
+      "cer": 1.214,
+      "hasLatin": true
+    },
+    {
+      "id": "b4-4",
+      "text": "색감은 따뜻한 톤과 차가운 톤 중에 고를 수 있어요.",
+      "heard": "자 값은 더 두서 더욱 과 죄 다 고 더 쪽에 도 리어 속의 서 요",
+      "cer": 0.9,
+      "hasLatin": false
+    },
+    {
+      "id": "b5-0",
+      "text": "배경을 단순하게 정리해 드릴 수도 있어요.",
+      "heard": "여기 에 리시 파 적 미달 룰을 이후 여기 있어요",
+      "cer": 0.882,
+      "hasLatin": false
+    },
+    {
+      "id": "b5-1",
+      "text": "여러 사람이 나온 사진은 최대 5명까지 가능해요.",
+      "heard": "[10] 억 사 나비 하고 비싸기 도 쥐고 이다 고 여기 나 욕 데요",
+      "cer": 1,
+      "hasLatin": false
+    },
+    {
+      "id": "b5-2",
+      "text": "선물용 포장은 2000원이 추가돼요.",
+      "heard": "더 용 뒤 주역이 쥐고 다 네요",
+      "cer": 0.786,
+      "hasLatin": false
+    },
+    {
+      "id": "b5-3",
+      "text": "선물 받는 분 주소로 바로 보낼 수 있어요.",
+      "heard": "더 유보 도 서 로 바로 고대 구 있어요",
+      "cer": 0.625,
+      "hasLatin": false
+    },
+    {
+      "id": "b5-4",
+      "text": "주문은 frameoart.com에서 할 수 있어요.",
+      "heard": "조 모두 [2] 부 의 멋 합의서 바오 수 있어요",
+      "cer": 1.1,
+      "hasLatin": true
+    },
+    {
+      "id": "b6-0",
+      "text": "프로필 링크를 누르면 주문 페이지로 이동해요.",
+      "heard": "그 의 링클 레오 노르 열 조목 데일리 로 데려오",
+      "cer": 0.895,
+      "hasLatin": false
+    },
+    {
+      "id": "b6-1",
+      "text": "작품마다 제작 번호가 붙어 있어요.",
+      "heard": "자 곳마다 치자 찢어 버리고 다 저 있어요",
+      "cer": 0.786,
+      "hasLatin": false
+    },
+    {
+      "id": "b6-2",
+      "text": "제작 번호는 FO-2026-0123 같은 형식이에요.",
+      "heard": "기자 버 교류를 해설 [2] 주 뒤 영업이익 사 OF THE DEAD 기어 이 측이 예요",
+      "cer": 0.905,
+      "hasLatin": true
+    },
+    {
+      "id": "b6-3",
+      "text": "캔버스 두께는 2.5cm예요.",
+      "heard": "러스 계도 뒤 이냐 이에요",
+      "cer": 0.727,
+      "hasLatin": true
+    },
+    {
+      "id": "b6-4",
+      "text": "벽에 걸었을 때 옆면까지 그림이 이어져요.",
+      "heard": "벽에 널 었을 때 역까지 누리 어딨 어요",
+      "cer": 0.471,
+      "hasLatin": false
+    },
+    {
+      "id": "b7-0",
+      "text": "LED 조명 아래에서도 반사가 적어요.",
+      "heard": "그 뒤 죠 여기 아래 했어도 바위 가 다 저 덮",
+      "cer": 0.923,
+      "hasLatin": true
+    },
+    {
+      "id": "b7-1",
+      "text": "UV 코팅으로 마감해요.",
+      "heard": "유 이 가 기구로 다음 해",
+      "cer": 1,
+      "hasLatin": true
+    },
+    {
+      "id": "b7-2",
+      "text": "오래된 흑백 사진도 색을 입혀 드릴 수 있어요.",
+      "heard": "오래 노인들 발 사기 인 록 세트 어류 의 요소 의 서열",
+      "cer": 0.944,
+      "hasLatin": false
+    },
+    {
+      "id": "b7-3",
+      "text": "원본과 완성 작품을 나란히 비교해 보세요.",
+      "heard": "[1] 노 도 와 있어 있죠 보비 아라기 로켓 보세요",
+      "cer": 0.882,
+      "hasLatin": false
+    },
+    {
+      "id": "b7-4",
+      "text": "붓 터치가 살아 있는 질감이 특징이에요.",
+      "heard": "다 죽 다 사 라인은 루치 역앞 IT 기기 에 요",
+      "cer": 0.875,
+      "hasLatin": false
+    },
+    {
+      "id": "b8-0",
+      "text": "가까이에서 보면 물감 결이 느껴져요.",
+      "heard": "이러 다 듯 복 여보 다음 혈 의 는 [10] 여",
+      "cer": 1,
+      "hasLatin": false
+    },
+    {
+      "id": "b8-1",
+      "text": "작은 방에는 40x50cm 크기를 추천해요.",
+      "heard": "자 그 밖에 도 있다 고 지양 크기 는 쥐고 돼요",
+      "cer": 0.813,
+      "hasLatin": true
+    },
+    {
+      "id": "b8-2",
+      "text": "거실 소파 위에는 50x70cm가 잘 어울려요.",
+      "heard": "여수 이어서 다 위에 누워 VT 약 [4] 자 와 고 여교사",
+      "cer": 1,
+      "hasLatin": true
+    },
+    {
+      "id": "b8-3",
+      "text": "부모님 결혼 30주년 선물로도 좋아요.",
+      "heard": "봄옷 립 여교사 A [2] 조 였어 유머 도 좋아요",
+      "cer": 0.75,
+      "hasLatin": false
+    },
+    {
+      "id": "b8-4",
+      "text": "졸업 사진을 작품으로 남기는 분도 많아요.",
+      "heard": "졸업 자기 도 자 고비 로 감기 도 로마 녀",
+      "cer": 0.706,
+      "hasLatin": false
+    },
+    {
+      "id": "b9-0",
+      "text": "주문 전에 사진이 적합한지 무료로 확인해 드려요.",
+      "heard": "조 및 적 익살 이 도 저 가 더 이기 옥 역으로 과 이 뒤 여유",
+      "cer": 1.05,
+      "hasLatin": false
+    },
+    {
+      "id": "b9-1",
+      "text": "궁금한 점은 댓글로 남겨 주세요.",
+      "heard": "드바 점유율은 그거 감겨 옥스 여",
+      "cer": 0.923,
+      "hasLatin": false
+    },
+    {
+      "id": "b9-2",
+      "text": "다음 영상에서는 제작 과정을 보여 드릴게요.",
+      "heard": "나 유영 싸게 서 유치 자 화정 동 어류 로 [25] 개 요",
+      "cer": 0.889,
+      "hasLatin": false
+    },
+    {
+      "id": "b9-3",
+      "text": "오늘 소개한 작품은 60x90cm 캔버스예요.",
+      "heard": "어유소 배가 겠죠 보물 로 쓰고 지향 해 너스레 예요",
+      "cer": 0.941,
+      "hasLatin": true
+    },
+    {
+      "id": "b9-4",
+      "text": "구매 정보는 채널 프로필 링크에서 확인하세요.",
+      "heard": "모범 적 모두 재건 불로 귀고리 그래서 부화기 하세요",
+      "cer": 0.842,
+      "hasLatin": false
+    }
+  ],
+  "avgCer": 0.8521714285714287,
+  "calls": 50,
+  "measuredAt": "2026-10-07T10:10:05.652Z"
+}

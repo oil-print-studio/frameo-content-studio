@@ -6,7 +6,14 @@
  *   pnpm shorts export <projectId> [common,youtube_shorts,instagram_reels]
  *   pnpm shorts edit <projectId> '<json>'   예: '{"op":"captionScale","scale":1.2}'
  *   pnpm shorts confirm <projectId>  모든 소재를 '판매 상품 촬영본'으로 확인
+ *   pnpm shorts doctor               실행 환경 점검(FFmpeg·글꼴·음성 엔진·Gemini)
+ *   pnpm shorts gemini-check [소재폴더]  Gemini 분석·대본·TTS 실제 호출 점검
+ *   pnpm shorts measure <projectId> [플랫폼]  저장된 영상의 실제 발화 기준 동기화·발음 측정
+ *   pnpm shorts sync-bench [local|gemini]  숫자·영문 포함 50문장 동기화·발음 측정
+ *   pnpm shorts calibrate            인스타·유튜브 앱 확인용 눈금 영상·표지 생성
+ *   pnpm shorts make <product.json>  실제 소재로 입력 → 초안 → 저장 → 검사 한 번에
  */
+import "./env";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { hasGemini } from "../lib/shorts/gemini";
@@ -15,6 +22,10 @@ import { isPlatformId, PLATFORM_IDS } from "../lib/shorts/platforms";
 import { dataRoot, loadProject, readLog, resolveInProject } from "../lib/shorts/store";
 import type { CallLogEntry, PlatformId } from "../lib/shorts/types";
 import { makeTestSources } from "./make-test-sources";
+import { doctor, printDoctor } from "./doctor";
+import { geminiCheck, measureProject, syncBench } from "./verify-tools";
+import { makeCalibrationKit } from "./calibrate";
+import { makeVideo } from "./make-video";
 
 function sec(ms: number) {
   return `${(ms / 1000).toFixed(1)}초`;
@@ -59,7 +70,8 @@ async function doExport(id: string, platforms: PlatformId[]) {
   }
   console.log(`\n[저장] ${resolveInProject(id, r.folder)} · ${sec(Date.now() - t)}`);
   for (const o of r.outputs) {
-    console.log(`  ${o.platform}: ${o.verify.ok ? "검사 통과" : "검사 실패"} · 렌더 ${sec(o.renderMs)} (컷 새로 ${o.renderedCuts}/재사용 ${o.reusedCuts})`);
+    console.log(`  ${o.platform}: ${o.verify.ok ? "검사 통과" : "검사 실패"} · ${o.verify.publishable ? "게시 가능" : "게시 불가"} · 음성 ${o.voice} · 렌더 ${sec(o.renderMs)} (컷 새로 ${o.renderedCuts}/재사용 ${o.reusedCuts})`);
+    for (const b of o.verify.blockers) console.log(`    ! ${b}`);
     for (const c of o.verify.checks) console.log(`    ${c.ok ? "✓" : "✗"} ${c.name}: ${c.detail}`);
   }
   return r;
@@ -145,8 +157,29 @@ async function main() {
       console.log("모든 소재를 확인했습니다.");
       break;
     }
+    case "doctor": {
+      const r = await doctor();
+      printDoctor(r);
+      if (!r.ok) process.exitCode = 1;
+      break;
+    }
+    case "gemini-check":
+      await geminiCheck(id);
+      break;
+    case "measure":
+      await measureProject(id, isPlatformId(arg) ? arg : "common");
+      break;
+    case "sync-bench":
+      await syncBench(id === "gemini" ? "gemini" : "local");
+      break;
+    case "calibrate":
+      await makeCalibrationKit();
+      break;
+    case "make":
+      await makeVideo(id);
+      break;
     default:
-      console.log("사용법: pnpm shorts demo | draft <id> | export <id> [플랫폼,...] | edit <id> '<json>' | confirm <id>");
+      console.log("사용법: pnpm shorts demo | draft <id> | export <id> [플랫폼,...] | edit <id> '<json>' | confirm <id> | doctor | gemini-check | measure <id> | sync-bench [local|gemini] | calibrate");
       process.exitCode = 1;
   }
 }

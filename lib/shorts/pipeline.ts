@@ -2,12 +2,14 @@ import { copyFile, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { analyzeAll, analyzerKey, assetReviewItems, effectiveSegments } from "./analyze";
 import { hashFile, hashOf, probe, parseRate, streamRotation } from "./media";
+import { speechSpans } from "./measure";
 import { checkClaims, generateScript, newHook, PLAN_PROMPT_VERSION } from "./planner";
 import { PLATFORMS } from "./platforms";
 import { postText } from "./postText";
 import { renderPlatform, type RenderOutput, PROFILES } from "./render";
 import {
   loadChannelSettings,
+  loadPlatformOverrides,
   loadProject,
   loadState,
   logStep,
@@ -23,7 +25,7 @@ import {
   writeJson,
 } from "./store";
 import { buildTimeline, timelineReviewItems, validateForRender } from "./timeline";
-import type { CallLogEntry, EditPlan, PlatformId, ProductCard, Project, ReviewItem, Segment, SourceAsset, Timeline, VerifyReport } from "./types";
+import type { AssetRole, CallLogEntry, EditPlan, PlatformId, ProductCard, Project, ReviewItem, Segment, SourceAsset, Timeline, VerifyReport } from "./types";
 import { verifyOutput } from "./verify";
 import { buildVoiceTrack } from "./voice";
 
@@ -35,6 +37,7 @@ export interface NewFile {
   data: Buffer;
   /** 사용자가 입력 단계에서 '판매 상품 촬영본'으로 확인했는지 */
   productConfirmed?: boolean;
+  role?: AssetRole;
 }
 
 export async function probeAsset(projectId: string, rel: string, fileName: string): Promise<Omit<SourceAsset, "id" | "productConfirmed">> {
@@ -69,10 +72,12 @@ export async function addAssets(project: Project, files: NewFile[]): Promise<Sou
     await mkdir(path.dirname(resolveInProject(project.id, rel)), { recursive: true });
     await writeFile(resolveInProject(project.id, rel), f.data);
     const meta = await probeAsset(project.id, rel, f.name);
-    added.push({ id, ...meta, productConfirmed: f.productConfirmed ? true : undefined });
+    added.push({ id, ...meta, productConfirmed: f.productConfirmed ? true : undefined, role: f.role });
   }
   project.assets.push(...added);
-  if (!project.product.referenceAssetId) project.product.referenceAssetId = project.assets.find((a) => a.kind === "image")?.id;
+  // 기준 사진: 완성 작품 → 상품 사진 → 첫 사진 순
+  if (!project.product.referenceAssetId)
+    project.product.referenceAssetId = (project.assets.find((a) => a.kind === "image" && a.role === "after") ?? project.assets.find((a) => a.kind === "image" && a.role !== "before") ?? project.assets.find((a) => a.kind === "image"))?.id;
   return added;
 }
 
@@ -185,6 +190,7 @@ async function stepVoiceTimeline(project: Project, plan: EditPlan, segments: Seg
   const track = await timed(project.id, "voice", () => buildVoiceTrack(project, plan), "음성 합성 중");
   const timeline = await timed(project.id, "timeline", async () => {
     const t = buildTimeline(project, plan, segments, track);
+    t.speechOnsets = (await speechSpans(resolveInProject(project.id, track.audioRel))).map((x) => Math.round(x.start * 1000) / 1000);
     await writeJson(timelineFile(project.id), t);
     return t;
   }, "타임라인 맞추는 중");
@@ -220,6 +226,7 @@ export interface DraftResult {
 
 /** 소재 입력 → 완성 초안(미리보기) 한 편. 완료된 단계는 건너뛰고 실패한 단계부터 이어간다 */
 export async function runDraft(projectId: string): Promise<DraftResult> {
+  await loadPlatformOverrides();
   const project = await loadProject(projectId);
   const notices: string[] = [];
   const segments = await stepAnalyze(project);
@@ -242,6 +249,7 @@ export type EditOp =
 
 /** 수정 유형별로 다시 할 작업만 실행한다(재사용 표는 README 참고) */
 export async function applyEdit(projectId: string, edit: EditOp): Promise<DraftResult & { redo: string[] }> {
+  await loadPlatformOverrides();
   const project = await loadProject(projectId);
   const prev = await loadPlan(projectId);
   if (!prev) throw new Error("초안을 먼저 만들어 주세요.");
@@ -337,6 +345,7 @@ export interface ExportResult {
 
 /** 3단계: 저장. 최종 해상도로 렌더 → 검사 → 패키지(MP4·SRT·표지·게시 문구·프로젝트 기록) */
 export async function exportPackage(projectId: string, platforms: PlatformId[]): Promise<ExportResult> {
+  await loadPlatformOverrides();
   const project = await loadProject(projectId);
   const plan = await loadPlan(projectId);
   const timeline = await loadTimeline(projectId);
@@ -360,12 +369,15 @@ export async function exportPackage(projectId: string, platforms: PlatformId[]):
       plan,
       platform,
       review,
+      product: project.product,
+      demoVoice: out.demoVoice,
+      voice: out.voice,
     });
     const pkgRel = path.join(folderRel, platform);
     const pkg = resolveInProject(projectId, pkgRel);
     await mkdir(pkg, { recursive: true });
     const slug = project.product.name.replace(/[^\p{L}\p{N}]+/gu, "_").slice(0, 30);
-    await copyFile(resolveInProject(projectId, out.videoRel), path.join(pkg, `${slug}_${platform}.mp4`));
+    await copyFile(resolveInProject(projectId, out.videoRel), path.join(pkg, `${slug}_${platform}${out.demoVoice ? "_DEMO-VOICE" : ""}.mp4`));
     await copyFile(resolveInProject(projectId, out.srtRel), path.join(pkg, `${slug}_${platform}.srt`));
     await copyFile(resolveInProject(projectId, out.coverRel), path.join(pkg, "cover.jpg"));
     if (out.coverGridRel) await copyFile(resolveInProject(projectId, out.coverGridRel), path.join(pkg, "cover_grid_4x5.jpg"));

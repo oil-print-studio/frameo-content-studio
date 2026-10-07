@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { buildAss, textWidth, wrapLines } from "@/lib/shorts/captions";
+import { buildAss, splitScreens, textWidth, wrapLines } from "@/lib/shorts/captions";
 import { josa } from "@/lib/shorts/korean";
 import { checkClaims, rulesScript } from "@/lib/shorts/planner";
-import { PLATFORMS } from "@/lib/shorts/platforms";
+import { applyPlatformOverrides, PLATFORMS } from "@/lib/shorts/platforms";
 import { postText } from "@/lib/shorts/postText";
 import { buildTimeline } from "@/lib/shorts/timeline";
 import type { EditPlan, Project, Segment } from "@/lib/shorts/types";
@@ -83,6 +83,15 @@ describe("자막 줄바꿈", () => {
   });
 });
 
+describe("자막 화면 나누기", () => {
+  it("두 줄을 넘으면 단어 하나만 남기지 않고 균형 있게 나눈다", () => {
+    const screens = splitScreens("FRAME O는 사진을 유화 느낌의 캔버스 작품으로 만들어요", 840, 70);
+    expect(screens.length).toBe(2);
+    for (const sc of screens) expect(sc.length).toBeLessThanOrEqual(2);
+    expect(screens[1].join(" ").split(" ").length).toBeGreaterThan(1);
+  });
+});
+
 describe("대본 규칙", () => {
   it("규칙 대본은 승인한 사실만 쓰고 검사에 걸리지 않는다", () => {
     const p = project();
@@ -156,9 +165,24 @@ describe("플랫폼별 출력", () => {
     const ig = buildAss(pl, tl, "instagram_reels", p.product);
     expect(yt).toContain(`,${1920 - PLATFORMS.youtube_shorts.captionBottomY},1\n`);
     expect(ig).toContain(`,${1920 - PLATFORMS.instagram_reels.captionBottomY},1\n`);
-    expect(yt).toContain("설명란");
+    expect(yt).toContain("구매 정보는 채널 프로필 링크에서 확인하세요".slice(0, 8));
     expect(ig).toContain("프로필 링크");
     expect(yt).toContain("광고 · 제휴");
+  });
+
+  it("마지막 안내는 줄이지 않고 두 줄 안으로 줄바꿈한다", () => {
+    const ass = buildAss(pl, tl, "common", p.product);
+    const line = ass.split("\n").find((l) => l.includes(",EndLine,"))!;
+    expect(line).toContain("\\N");
+    expect(line.replace(/\{[^}]*\}/g, "").replace("\\N", " ")).toContain("구매 정보는 채널 프로필 링크에서 확인하세요");
+  });
+
+  it("플랫폼 조정값(platforms.json)을 기본값 위에 덮어쓴다", () => {
+    applyPlatformOverrides({ instagram_reels: { captionBottomY: 1200, coverTextArea: { top: 500, bottom: 1400 } } });
+    expect(PLATFORMS.instagram_reels.captionBottomY).toBe(1200);
+    expect(PLATFORMS.instagram_reels.marginRight).toBe(170);
+    applyPlatformOverrides(undefined);
+    expect(PLATFORMS.instagram_reels.captionBottomY).toBe(1290);
   });
 
   it("공용 자막은 두 플랫폼 중 더 안전한 위치를 쓴다", () => {

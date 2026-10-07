@@ -1,7 +1,8 @@
 import { randomBytes } from "node:crypto";
 import { appendFile, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
-import type { CallLogEntry, ChannelSettings, Project, ProjectState, StepName, StepState } from "./types";
+import { applyPlatformOverrides, type PlatformOverride } from "./platforms";
+import type { CallLogEntry, ChannelSettings, PlatformId, Project, ProjectState, StepName, StepState } from "./types";
 
 /** 로컬 프로젝트 저장 위치. 기본은 저장소의 data/shorts (git 제외) */
 export function dataRoot(): string {
@@ -119,4 +120,13 @@ export async function loadChannelSettings(): Promise<ChannelSettings> {
 
 export async function saveChannelSettings(s: ChannelSettings): Promise<void> {
   await writeJson(path.join(dataRoot(), "channel.json"), s);
+}
+
+export const platformOverridesFile = () => path.join(dataRoot(), "platforms.json");
+
+/** 실제 앱 확인 결과로 조정한 플랫폼 값(data/shorts/platforms.json)을 적용 */
+export async function loadPlatformOverrides(): Promise<Partial<Record<PlatformId, PlatformOverride>> | undefined> {
+  const o = await readJson<Partial<Record<PlatformId, PlatformOverride>>>(platformOverridesFile());
+  applyPlatformOverrides(o);
+  return o;
 }
