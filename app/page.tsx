@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, useState } from "react";
 import { CaptionResult } from "@/components/CaptionResult";
 import { PhotoUpload } from "@/components/PhotoUpload";
@@ -85,7 +86,10 @@ export default function FeedPostMakerPage() {
           <span className={styles.wordmark}>{BRAND.name}</span>
           <span className={styles.product}>Content Studio</span>
         </div>
-        <span className={styles.badge}>인스타 피드 게시물</span>
+        <nav className={styles.nav}>
+          <Link href="/shorts">쇼핑 쇼츠·릴스</Link>
+          <span className={styles.badge}>인스타 피드 게시물</span>
+        </nav>
       </header>
 
       <main className={styles.main}>
